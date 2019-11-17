@@ -350,7 +350,7 @@ sessionCountDF <- ayce_40034_3005 %>%
   
   #Highest level per participant per session
   AYCET_highestLevel_Sess <- ayce_40034_3005 %>%
-    group_by(userID, sesID) %>%
+    group_by(userID, sessionCount) %>%
     summarize(sessionHighestLevel = max(gameLevel, na.rm = TRUE)) %>%
     group_by(userID) %>%
     mutate(userHighestLevel = max(sessionHighestLevel, na.rm = TRUE))
@@ -358,22 +358,22 @@ sessionCountDF <- ayce_40034_3005 %>%
   #Filter rows to get counts of trials within the highest level (per user per session)
   AYCET_highestLevelCount_Sess <- ayce_40034_3005 %>%
     filter (gameLevel == sessionHighestLevel) %>%
-    group_by(userID, sesID) %>%
+    group_by(userID, sessionCount) %>%
     summarize(sessionHighestTrialCount = n()) 
   
   #Count all trials per session
   AYCET_trialCount_Sess <- ayce_40034_3005 %>% 
-    group_by(userID, sesID)  %>%
+    group_by(userID, sessionCount)  %>%
     summarize(sessTrialCount = n())
   
   #Number of levels played
   AYCET_levelsTotal_sess <- ayce_40034_3005 %>%
-    group_by(userID, sesID) %>%
+    group_by(userID, sessionCount) %>%
     summarize(nLevels = n_distinct(gameLevel)) 
   
   #Total time played (seconds) per sessions
   AYCET_totalTimePlayed_Sess <- ayce_40034_3005 %>%
-    group_by(userID, sesID) %>%
+    group_by(userID, sessionCount) %>%
     summarize(
       max = max(logTimestamp),
       min = min(logTimestamp),
@@ -386,7 +386,7 @@ sessionCountDF <- ayce_40034_3005 %>%
     )
   
   HitCount_Sess <- AYCET_40034 %>% #Hits
-    group_by(userID, sesID)  %>%
+    group_by(userID, sessionCount)  %>%
     filter(hitType == "HIT") %>%
     summarize(HITS = n(), 
               sessAvgHitRT = mean(reactionTime, na.rm = TRUE), 
@@ -394,7 +394,7 @@ sessionCountDF <- ayce_40034_3005 %>%
 
   #Calculate misses per user and session
   MissCount_Sess <- AYCET_40034 %>% #Misses
-    group_by(userID, sesID)  %>%
+    group_by(userID, sessionCount)  %>%
     filter(hitType == "MISSED") %>%
     summarize(MISSED = n(), 
               sessAvgMissRT = mean(reactionTime, na.rm = TRUE), 
@@ -402,14 +402,15 @@ sessionCountDF <- ayce_40034_3005 %>%
   
   #Calculate wrongs per user and session
   WrongCount_Sess <- AYCET_40034 %>% #Wrongs
-    group_by(userID, sesID)  %>%
+    group_by(userID, sessionCount)  %>%
     filter(hitType == "WRONG") %>%
     summarize(WRONG = n(), 
               sessAvgWrongRT = mean(reactionTime, na.rm = TRUE), 
               sessSDWrongRT = sd(reactionTime, na.rm = TRUE)) 
   
   #Join hit metrics for user level info per session
-  aggregatedSessList <- list(AYCET_fastestHits, AYCET_lastSes, AYCET_highestLevel, AYCET_userTrials, AYCET_levelsTotal_sess, AYCET_totalTimePlayed, sessionLevelInfo, HitCount_Sess, MissCount_Sess, WrongCount_Sess)
+  aggregatedSessList <- list(AYCET_fastestHits_sess, AYCET_highestLevel_Sess, AYCET_highestLevelCount_Sess, AYCET_trialCount_Sess, AYCET_levelsTotal_sess, 
+                             AYCET_totalTimePlayed_Sess, HitCount_Sess, MissCount_Sess, WrongCount_Sess)
   aggregateSess <- reduce(aggregatedSessList, full_join, by = c("userID", "sesID"))
   
   #Calculate percent of all trials in highest level by session
