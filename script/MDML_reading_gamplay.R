@@ -285,7 +285,7 @@ sessionCountDF <- ayce_40034_3005 %>%
   AYCET_fastestHits_user <- ayce_40034_3005 %>%
     filter(hitType == "HIT") %>%
     group_by(accessCode, userID) %>%
-    summarize(sessFastestRT = min(reactionTime, na.rm = TRUE))
+    summarize(userFastestRT = min(reactionTime, na.rm = TRUE))
   
   #Highest level per participant per session
   AYCET_highestLevel_user <- ayce_40034_3005 %>%
@@ -338,7 +338,31 @@ sessionCountDF <- ayce_40034_3005 %>%
     summarize(WRONG = n(), 
               AvgWrongRT = mean(reactionTime, na.rm = TRUE), 
               SDWrongRT = sd(reactionTime, na.rm = TRUE)) 
+ 
   
+   #Join hit metrics for user level info
+  aggregatedList <- list(AYCET_fastestHits_user, AYCET_highestLevel_user, AYCET_highestLevelCount_user, AYCET_trialCount_user, AYCET_levelsTotal_user, 
+                             AYCET_totalTimePlayed_user, HitCount_user, MissCount_user, WrongCount_user)
+  aggregate <- reduce(aggregatedList, full_join, by = c("userID"))
+  
+  #Calculate percent of all trials in highest level by session
+  aggregate$highestLevelPct <- round(aggregate$userHighestTrialCount/aggregate$userTrialCount, 2) * 100
+  
+  #Calculate Percent Correct
+  aggregate$PercentCorrect <- round(aggregate$HITS/rowSums(aggregate[,c("HITS", "MISSED", "WRONG")], na.rm = TRUE), 2)*100
+  
+  #Replace NA's with 0's
+  aggregate[, c("HITS", "MISSED", "WRONG")][is.na(aggregate[, c("HITS", "MISSED", "WRONG")])] <- 0
+  
+  #HitRate with loglinear correction
+  aggregate$HitRate <- round(((aggregate$HITS + .5)/(aggregate$userTrialCount + 1)),2)
+  #False Alarm rate with loglinear correction
+  aggregate$FARate <- round(((aggregate$WRONG + .5)/(aggregate$userTrialCount + 1)),2)
+  
+  #D Prime
+  #str(aggregateUsers)
+  aggregate$DPrime <- (qnorm(aggregate$HitRate) - qnorm(aggregate$FARate))  
+    
   
 #########  
 #Variables per user per session
@@ -411,7 +435,7 @@ sessionCountDF <- ayce_40034_3005 %>%
   #Join hit metrics for user level info per session
   aggregatedSessList <- list(AYCET_fastestHits_sess, AYCET_highestLevel_Sess, AYCET_highestLevelCount_Sess, AYCET_trialCount_Sess, AYCET_levelsTotal_sess, 
                              AYCET_totalTimePlayed_Sess, HitCount_Sess, MissCount_Sess, WrongCount_Sess)
-  aggregateSess <- reduce(aggregatedSessList, full_join, by = c("userID", "sesID"))
+  aggregateSess <- reduce(aggregatedSessList, full_join, by = c("userID", "sessionCount"))
   
   #Calculate percent of all trials in highest level by session
   aggregateSess$highestLevelPct <- round(aggregateSess$sessionHighestTrialCount/aggregateSess$sessTrialCount, 2) * 100
