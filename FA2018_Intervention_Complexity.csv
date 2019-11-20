@@ -1,0 +1,51 @@
+gameLevelShort,Panel,level,desc_2,desc,#rules,Type of rules,Complex Rule,Black hole,Radiation,Complexity
+SpaceCakesLevel 0-0,Panel 1,1,Introduce alien rules,Color rule,2,1,0,0,0,1
+SpaceCakesLevel 0-1,Panel 1,2,Introduce alien rules,Eye rule,2,1,0,0,0,1
+SpaceCakesLevel 0-2,Panel 1,3,Introduce alien rules,Color + Eye rule,4,2,0,0,0,2
+SpaceCakesLevel 0-3,Panel 1,4,Introduce alien rules,Both rule,2,1,1,0,0,2
+SpaceCakesLevel 0-4,Panel 1,5,Introduce alien rules,Fast Both rule,2,1,1,0,0,2
+SpaceCakesLevel 1-0,Panel 2,6,Introduce Black holes,Black hole + Color,1,1,0,2,0,3
+SpaceCakesLevel 1-1,Panel 2,7,Introduce Black holes,Black hole + Eye,1,1,0,2,0,3
+SpaceCakesLevel 1-2,Panel 2,8,Introduce Black holes,Black hole + two colors,2,1,0,2,0,3
+SpaceCakesLevel 1-3,Panel 2,9,Introduce Black holes,Black hole + two eyes,2,1,0,2,0,3
+SpaceCakesLevel 1-4,Panel 2,10,Introduce Black holes,Black hole + color + eye,4,2,0,2,0,4
+SpaceCakesLevel 2-0,Panel 3,11,Black holes with complex rules,Black hole + 1eye_both,1,1,1,2,0,4
+SpaceCakesLevel 2-1,Panel 3,12,Black holes with complex rules,Black hole + red_both,1,1,1,2,0,4
+SpaceCakesLevel 2-2,Panel 3,13,Black holes with complex rules,Black hole +  2eye_both switch,2,1,1,2,0,4
+SpaceCakesLevel 2-3,Panel 3,14,Black holes with complex rules,Black hole +  color_both switch,2,1,1,2,0,4
+SpaceCakesLevel 2-4,Panel 3,15,Black holes with complex rules,Black hole + color both + eye both switch,4,2,1,2,0,5
+SpaceCakesLevel 3-0,Panel 4,16,Introduce radiation,Radiation + eye,1,1,0,0,3,4
+SpaceCakesLevel 3-1,Panel 4,17,Introduce radiation,Radiation + red_both,1,1,0,0,3,4
+SpaceCakesLevel 3-2,Panel 4,18,Introduce radiation,Radiation + color_both switch,2,1,1,0,3,5
+SpaceCakesLevel 3-3,Panel 4,19,Introduce radiation,Radiation + eye_both switch,2,1,1,0,3,5
+SpaceCakesLevel 3-4,Panel 4,20,Introduce radiation,Radition + eye_both + color_both switch,4,2,1,0,3,6
+SpaceCakesLevel 4-0,Panel 5,21,Radiation and black hole together,R + B + Color,1,1,0,2,3,6
+SpaceCakesLevel 4-1,Panel 5,22,Radiation and black hole together,R + B + Eye,1,1,0,2,3,6
+SpaceCakesLevel 4-2,Panel 5,23,Radiation and black hole together,R + B + Color swicth,2,1,0,2,3,6
+SpaceCakesLevel 4-3,Panel 5,24,Radiation and black hole together,R + B + Eye switch,2,1,0,2,3,6
+SpaceCakesLevel 4-4,Panel 5,25,Radiation and black hole together,R + B + Color + Eye switch,4,2,0,2,3,7
+SpaceCakesLevel 5-0,Panel 6,26,Radition and black hole with complex rules,R + B + Color_both,1,1,1,2,3,7
+SpaceCakesLevel 5-1,Panel 6,27,Radition and black hole with complex rules,R + B + Eye_both,1,1,1,2,3,7
+SpaceCakesLevel 5-2,Panel 6,28,Radition and black hole with complex rules,R + B + Color_both switch,2,1,1,2,3,7
+SpaceCakesLevel 5-3,Panel 6,29,Radition and black hole with complex rules,R + B + Eye_both switch,2,1,1,2,3,7
+SpaceCakesLevel 5-4,Panel 6,30,Radition and black hole with complex rules,R + B + Color_both + Eye_both switch,4,2,1,2,3,8
+SpaceCakesLevel 6-0,Panel 7,31,Faster Radiation and Black hole,R + B + Color,1,1,0,2,3,6
+SpaceCakesLevel 6-1,Panel 7,32,Faster Radiation and Black hole,R + B + Eye,1,1,0,2,3,6
+SpaceCakesLevel 6-2,Panel 7,33,Faster Radiation and Black hole,R + B + Color switch,2,1,0,2,3,6
+SpaceCakesLevel 6-3,Panel 7,34,Faster Radiation and Black hole,R + B + Eye switch,2,1,0,2,3,6
+SpaceCakesLevel 6-3,Panel 7,35,Faster Radiation and Black hole,R + B + Color + Eye switch,4,2,0,2,3,7
+,Panel 8,36,Faster Radiation and Black hole with complex rules,R + B + Color_both,1,,,Y,Y,0
+,Panel 8,37,Faster Radiation and Black hole with complex rules,R + B + Eye_both,1,,,Y,Y,0
+,Panel 8,38,Faster Radiation and Black hole with complex rules,R + B + Color_both swicth,2,,,Y,Y,0
+,Panel 8,39,Faster Radiation and Black hole with complex rules,R + B + Eye_both switch,2,,,Y,Y,0
+,Panel 8,40,Faster Radiation and Black hole with complex rules,R + B + Color_both + Eye_both switch,4,,,Y,Y,0
+,Panel 9 ,41,Fastest radition and black hole with complex rules,R + B + Color_both,1,,,Y,Y,0
+,Panel 9 ,42,Fastest radition and black hole with complex rules,R + B + Eye_both,1,,,Y,Y,0
+,Panel 9 ,43,Fastest radition and black hole with complex rules,R + B + Color_both swicth,2,,,Y,Y,0
+,Panel 9 ,44,Fastest radition and black hole with complex rules,R + B + Eye_both switch,2,,,Y,Y,0
+,Panel 9 ,45,Fastest radition and black hole with complex rules,R + B + Color_both + Eye_both switch,4,,,Y,Y,0
+,Panel 10,46,Safety net with longest fastest and complex levels,R + B + Color_both,1,,,Y,Y,0
+,Panel 10,47,Safety net with longest fastest and complex levels,R + B + Eye_both,1,,,Y,Y,0
+,Panel 10,48,Safety net with longest fastest and complex levels,R + B + Color_both swicth,2,,,Y,Y,0
+,Panel 10,49,Safety net with longest fastest and complex levels,R + B + Eye_both switch,2,,,Y,Y,0
+,Panel 10,50,Safety net with longest fastest and complex levels,R + B + Color_both + Eye_both switch,4,,,Y,Y,0
