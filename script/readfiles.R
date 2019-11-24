@@ -50,3 +50,22 @@ common_path2 = "C:/Users/samee/Dropbox/NYU-PhD/3. Fall 2019/Messy Data and ML/Fi
     
 # Co relation matrix between pre_nihScore against post_nihSore, pre_nihAccuracy against post_nihAccuracy,
       #pre_nihRTScore against post nihRTScore
+      cor_data<-select(combined_file,pre_nihScore, pre_nihAccuracy,pre_nihRTScore ,post_nihScore, post_nihAccuracy, post_nihRTScore)
+      res<-cor(cor_data[,1:3],cor_data[,4:6])
+      res
+      X = combined_file$pre_nihScore
+      Y=combined_file$post_nihScore
+      cor(X, Y)
+      #0.384
+   
+      X = combined_file$pre_nihAccuracy
+      Y=combined_file$post_nihAccuracy
+      cor(X, Y)
+      
+      #0.4964224
+      X = combined_file$pre_nihRTScore
+      Y=combined_file$post_nihRTScore
+      cor(X,Y)
+      #0.2774543
+      
+      ################################### FLANKER ################################################################
