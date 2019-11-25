@@ -404,31 +404,34 @@ sessionCountDF <- ayce_40034_3005 %>%
 #Accuracy for beginning, middle, end of session
       #Get average complexity for each section just for reference as well? 
       
-accuracy_vs_timeChunk <- ayce_40034_3005 %>%
+ayce_40034_3005 <- ayce_40034_3005 %>%
   group_by(userID, sesCount) %>%
     arrange(logTimestamp) %>%
-    mutate(
-      session_thirds = ntile(sesCount, 3)) %>%
+    mutate(session_thirds = ntile(sesCount, 3)) #creates thirds of each session in terms of #trials; time varies somewhat.
+      #group_by(userID, sesCount, session_thirds) %>%
+      
+third_count_DF <- ayce_40034_3005 %>%
     group_by(userID, sesCount, session_thirds) %>%
-    summarize(third_time = difftime(max(logTimestamp) - min(logTimestamp)))
-
-accuracy_vs_timeChunk <- ayce_40034_3005 %>%
-  group_by(userID, sesCount) %>%
-  arrange(logTimestamp) %>%
-  mutate(rownum = row_number(),
-    session_thirds = ntile(rownum, 3)) %>%
-  group_by(userID, sesCount, session_thirds) %>%
-  summarize(third_time = max(logTimestamp) - min(logTimestamp))
-
-accuracy_vs_timeChunk <- ayce_40034_3005 %>%
-  group_by(userID, sesCount) %>%
-  arrange(logTimestamp) %>%
-  mutate(
-         session_thirds = ntile(logTimestamp, 3)) %>%
-  group_by(userID, sesCount, session_thirds) %>%
-  summarize(third_time = max(logTimestamp) - min(logTimestamp))
+    summarize(#third_time = max(logTimestamp) - min(logTimestamp),
+               third_count = n(),
+               avgComplexity = mean(Complexity, na.rm = T))
   
-summary(accuracy_vs_timeChunk$third_time)
+accuracy_thirds <- ayce_40034_3005 %>% #Hits
+    group_by(userID, sesCount, session_thirds)  %>%
+        filter(hitType == "HIT") %>%
+        summarize(third_Hits = n())
+
+Accuracy_vs_timeChunk <- left_join(third_count_DF, accuracy_thirds, by = c("userID", "sesCount", "session_thirds")) %>%
+  mutate(third_accuracy = third_Hits/third_count) %>%
+  filter(!userID %in% badUsers)
+
+    ######Graph how users do at the beginning, middle, and end of sessions; can account for average complexity
+    #facet by sesCount
+Accuracy_vs_timeChunk_plot <- ggplot( data = Accuracy_vs_timeChunk, aes(x = factor(session_thirds), y = third_accuracy, group = userID, color = avgComplexity)) +
+  geom_line() + 
+  geom_point() + 
+  facet_grid(~ sesCount)
+
    
    #Join hit metrics for user level info
   aggregatedList <- list(AYCET_fastestHits_user, AYCET_highestLevel_user, AYCET_highestLevelCount_user, AYCET_trialCount_user, AYCET_levelsTotal_user, 
