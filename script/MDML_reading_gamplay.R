@@ -13,6 +13,23 @@ require(sqldf)
 
 
 ####
+
+length(unique(ayce_40034_3005Edit$userID))
+#147 AYCET users, but I see at least 1 known 'bad' user
+
+#userIDs to remove 
+badUsers <- c(115,   
+              132,
+              17214:17228,
+              17191:17213,
+              17348,
+              17386,
+              17393,
+              17394,
+              18128,
+              18129,
+              18536)
+
 getwd()
 
 #List of access codes with AYCET data in them, to generate file paths + names
@@ -167,15 +184,55 @@ ayce_4004 <- ayce_4004 %>%
 
 ayce_40034 <- merge(ayce_4003, ayce_4004[,c("accessCode", "userID", "sesID", "gsUserID", "gameKey", "gameLevel","alienID", "reactionTime", "eyeReactionTime", "afterHighlightedReactionTime", "jotID")], 
                     by.x = c("accessCode", "userID", "sesID", "gsUserID", "gameKey","gameLevel", "alienID", "jotID2"),
-                    by.y = c("accessCode", "userID", "sesID", "gsUserID", "gameKey","gameLevel", "alienID", "jotID"))
+                    by.y = c("accessCode", "userID", "sesID", "gsUserID", "gameKey","gameLevel", "alienID", "jotID")) %>%
+        arrange(accessCode, userID, sesID, gsUserID, gameKey, gameLevel, alienID)
 
 #Import and Merge 3005 datato get wave types and identify rule changes
+
+#4005
+filepaths_4005 <- expand.grid(x=accessCodes) %>% 
+{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4005.csv')}
+
+ayce_4005 <- do.call(rbind, lapply(filepaths_4005, read_csv))
+
+#4002
+filepaths_4002 <- expand.grid(x=accessCodes) %>% 
+{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4002.csv')}
+
+ayce_4002 <- do.call(rbind, lapply(filepaths_4002, read_csv))
+
+
+#4001
+filepaths_4001 <- expand.grid(x=accessCodes) %>% 
+{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4001.csv')}
+
+ayce_4001 <- do.call(rbind, lapply(filepaths_4001, read_csv))
+
+
+
+#3009
+filepaths_3009 <- expand.grid(x=accessCodes) %>% 
+{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3009.csv')}
+
+ayce_3009 <- do.call(rbind, lapply(filepaths_3009, read_csv))
+
+
+ayce_3009_2 <- ayce_3009 %>%
+  group_by(accessCode, userID, sesID, gsUserID, gameKey, gameLevel, alienID) %>%
+  summarize(n = n()) %>%
+  filter(n > 1)
 
 #3005
 filepaths_3005 <- expand.grid(x=accessCodes) %>% 
 {paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3005.csv')}
 
 ayce_3005 <- do.call(rbind, lapply(filepaths_3005, read_csv))
+
+ayce_3005_2 <- ayce_3005 %>%
+  group_by(accessCode, userID, sesID, gsUserID, gameKey, gameLevel, jotID) %>%
+  summarize(n = n()) %>%
+  filter(n > 1)
+  
 
 #There were duplicates, so remove them 
 ayce_3005_3 <- ayce_3005 %>%
@@ -259,7 +316,9 @@ ayce_40034_3005 <- ayce_40034_3005 %>%
   select(accessCode, userID, sesID, gsUserID, gameKey, gameLevel, alienID, gameCode, logTimestamp, logID, jotID, gameTime,
          alienTypeAndColor, hitType, speed, reactionTime, eyeReactionTime, afterHighlightedReactionTime, waveType) %>%
   distinct() %>%
-  arrange(accessCode, userID, sesID, gsUserID, gameKey, gameLevel, alienID)
+  arrange(accessCode, userID, sesID, gsUserID, gameKey, gameLevel, alienID) %>%
+  filter(!userID %in% badUsers)
+
   #Still has 10 extra rows but I don't know how to find them...
 ##############
 #Add needed variables for further analysis
