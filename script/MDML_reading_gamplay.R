@@ -19,7 +19,7 @@ length(unique(ayce_40034_3005Edit$userID))
 
 #userIDs to remove 
 badUsers <- read_csv("data/testAccounts.csv")
-badUsers <- list(badUsers$userID)
+badUsers <- c(badUsers$userID)
 
 #List of access codes with AYCET data in them, to generate file paths + names
 accessCodes <- c("ATHBF18", "ATHF18", "ATM1F18", "ATMBF18")
@@ -345,7 +345,57 @@ sessionCountDF <- ayce_40034_3005 %>%
               AvgWrongRT = mean(reactionTime, na.rm = TRUE), 
               SDWrongRT = sd(reactionTime, na.rm = TRUE)) 
  
+ #Accuracy % for first alien after a rule change
+  RuleChange_user <- ayce_40034_3005 %>%
+    group_by(userID, gameLevelShort, Complexity) %>%
+      arrange(alienID) %>%
+      slice(1) %>%
+    group_by(userID) %>%
+      summarize(first_count = n())
   
+  RuleChange_user_correct <- ayce_40034_3005 %>%
+    group_by(userID, gameLevelShort, Complexity) %>%
+      arrange(alienID) %>%
+      slice(1) %>%
+      filter(hitType == "HIT") %>%
+    group_by(userID) %>%
+      summarize(first_count_correct = n())
+  
+  RuleChange_user <- left_join(RuleChange_user, RuleChange_user_correct, by = c("userID")) %>%
+    mutate(RuleChange_Accuracy_Pct = first_count_correct/first_count)
+  
+  #Avg Reaction time per complexity level
+  RT_complexity_user <- ayce_40034_3005 %>% #Hits
+    group_by(userID, Complexity)  %>%
+    filter(hitType == "HIT") %>%
+    summarize(HITS = n(), 
+              complexity_AvgHitRT = mean(reactionTime, na.rm = TRUE), 
+              complexity_SDHitRT = sd(reactionTime, na.rm = TRUE))
+ 
+  #Trial counts for Accuracy Pct per complexity level
+  Count_complexity_user <- ayce_40034_3005 %>% #all trials per complexity level
+    group_by(userID, Complexity)  %>%
+    summarize(complexityTrialCount = n())
+  
+  #Hits for Accuracy Pct per complexity level
+  Accuracy_complexity_user <- ayce_40034_3005 %>% #Hits
+    group_by(userID, Complexity)  %>%
+    filter(hitType == "HIT") %>%
+    summarize(Complexity_Hits = n())
+  
+  Accuracy_complexity_user <- left_join(Count_complexity_user, Accuracy_complexity_user, by = c("userID", "Complexity")) %>%
+    mutate(Complexity_Accuracy_Pct = Complexity_Hits/complexityTrialCount) %>%
+    filter(!userID %in% badUsers)
+  
+      #######Graph complexity (x axis), accuracy % (y axis), line per user
+      accuracy_vs_complexity <- ggplot(data = Accuracy_complexity_user, aes(x = Complexity, y = Complexity_Accuracy_Pct, group = userID,
+                                       color = userID)) + 
+        geom_line() + 
+        geom_point() +
+        theme(legend.position = "none")
+  
+  
+   
    #Join hit metrics for user level info
   aggregatedList <- list(AYCET_fastestHits_user, AYCET_highestLevel_user, AYCET_highestLevelCount_user, AYCET_trialCount_user, AYCET_levelsTotal_user, 
                              AYCET_totalTimePlayed_user, HitCount_user, MissCount_user, WrongCount_user)
