@@ -18,39 +18,15 @@ length(unique(ayce_40034_3005Edit$userID))
 #147 AYCET users, but I see at least 1 known 'bad' user
 
 #userIDs to remove 
-badUsers <- c(115,   
-              132,
-              17214:17228,
-              17191:17213,
-              17348,
-              17386,
-              17393,
-              17394,
-              18128,
-              18129,
-              18536)
-
-getwd()
+badUsers <- read_csv("data/testAccounts.csv")
+badUsers <- list(badUsers$userID)
 
 #List of access codes with AYCET data in them, to generate file paths + names
 accessCodes <- c("ATHBF18", "ATHF18", "ATM1F18", "ATMBF18")
 #gameCodes <- c(3009, 4003, 4004)
 
-#Useful as a way to list all the files, but not actually used here
-#filenames <- expand.grid(x=accessCodes, y=gameCodes) %>% 
-#{paste0(.$x, '_', .$y)}
-
-#filepaths <- expand.grid(x=accessCodes, y=gameCodes) %>% 
-#{paste0('/Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_', .$y, '.csv')}
-
 #Read in the files and append the same gameCodes to each other
 
-#3009
-#filepaths_3009 <- expand.grid(x=accessCodes) %>% 
-#{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3009.csv')}
-
-#ayce_3009 <- do.call(rbind, lapply(filepaths_3009, read_csv))
-#Note paths, in case this changes
 #4003
 filepaths_4003 <- expand.grid(x=accessCodes) %>% 
 {paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
@@ -187,40 +163,7 @@ ayce_40034 <- merge(ayce_4003, ayce_4004[,c("accessCode", "userID", "sesID", "gs
                     by.y = c("accessCode", "userID", "sesID", "gsUserID", "gameKey","gameLevel", "alienID", "jotID")) %>%
         arrange(accessCode, userID, sesID, gsUserID, gameKey, gameLevel, alienID)
 
-#Import and Merge 3005 datato get wave types and identify rule changes
-
-#4005
-filepaths_4005 <- expand.grid(x=accessCodes) %>% 
-{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4005.csv')}
-
-ayce_4005 <- do.call(rbind, lapply(filepaths_4005, read_csv))
-
-#4002
-filepaths_4002 <- expand.grid(x=accessCodes) %>% 
-{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4002.csv')}
-
-ayce_4002 <- do.call(rbind, lapply(filepaths_4002, read_csv))
-
-
-#4001
-filepaths_4001 <- expand.grid(x=accessCodes) %>% 
-{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4001.csv')}
-
-ayce_4001 <- do.call(rbind, lapply(filepaths_4001, read_csv))
-
-
-
-#3009
-filepaths_3009 <- expand.grid(x=accessCodes) %>% 
-{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3009.csv')}
-
-ayce_3009 <- do.call(rbind, lapply(filepaths_3009, read_csv))
-
-
-ayce_3009_2 <- ayce_3009 %>%
-  group_by(accessCode, userID, sesID, gsUserID, gameKey, gameLevel, alienID) %>%
-  summarize(n = n()) %>%
-  filter(n > 1)
+#Import and Merge 3005 data to get wave types and identify rule changes
 
 #3005
 filepaths_3005 <- expand.grid(x=accessCodes) %>% 
@@ -228,12 +171,11 @@ filepaths_3005 <- expand.grid(x=accessCodes) %>%
 
 ayce_3005 <- do.call(rbind, lapply(filepaths_3005, read_csv))
 
-ayce_3005_2 <- ayce_3005 %>%
-  group_by(accessCode, userID, sesID, gsUserID, gameKey, gameLevel, jotID) %>%
-  summarize(n = n()) %>%
-  filter(n > 1)
+#ayce_3005_2 <- ayce_3005 %>%
+#  group_by(accessCode, userID, sesID, gsUserID, gameKey, gameLevel, jotID) %>%
+#  summarize(n = n()) %>%
+#  filter(n > 1)
   
-
 #There were duplicates, so remove them 
 ayce_3005_3 <- ayce_3005 %>%
   group_by(accessCode, userID, sesID, gsUserID, gameKey, gameLevel, jotID) %>%
@@ -340,7 +282,12 @@ sessionCountDF <- ayce_40034_3005 %>%
   
   ayce_40034_3005 <- left_join(ayce_40034_3005, sessionCountDF[, c("userID", "date", "sesID", "gsUserID", "sesCount", "sesCountAll")], by = c("userID", "date", "sesID", "gsUserID"))
   
-#Variables per user
+  #Import & merge complexity information
+  complexity <- read_csv("data/FA2018_Intervention_Complexity.csv")
+  
+  ayce_40034_3005 <- left_join(ayce_40034_3005, complexity[, c("gameLevelShort", "Complexity")], by = c("gameLevelShort"))
+#######  
+  #Variables per user
   AYCET_fastestHits_user <- ayce_40034_3005 %>%
     filter(hitType == "HIT") %>%
     group_by(accessCode, userID) %>%
@@ -513,3 +460,6 @@ sessionCountDF <- ayce_40034_3005 %>%
   #D Prime
   #str(aggregateUsers)
   aggregateSess$DPrime <- (qnorm(aggregateSess$HitRate) - qnorm(aggregateSess$FARate))  
+  
+
+  
