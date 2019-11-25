@@ -432,6 +432,19 @@ Accuracy_vs_timeChunk_plot <- ggplot( data = Accuracy_vs_timeChunk, aes(x = fact
   geom_point() + 
   facet_grid(~ sesCount)
 
+#Accuracy & avg RT after Wrongs
+afterWrongs <- ayce_40034_3005 %>%
+  mutate(next_alien_hit = lead(hitType), 
+         next_alien_RT = lead(reactionTime)) %>%
+  filter(hitType == "WRONG") %>%
+  arrange(userID, sesCount, gameLevel, alienID) %>%
+  group_by(userID, next_alien_hit) %>%
+  summarize(count = n(),
+    avgRT_afterWrong = mean(next_alien_RT, na.rm = T)) %>%
+  pivot_wider(names_from = "next_alien_hit", values_from = c("count", "avgRT_afterWrong")) %>%
+  mutate(n_afterWrong = sum(count_HIT, count_WRONG, count_MISSED, count_NA, na.rm = T),
+         accuracy_afterWrong = count_HIT/n_afterWrong)
+
    
    #Join hit metrics for user level info
   aggregatedList <- list(AYCET_fastestHits_user, AYCET_highestLevel_user, AYCET_highestLevelCount_user, AYCET_trialCount_user, AYCET_levelsTotal_user, 
