@@ -440,7 +440,7 @@ afterWrongs <- ayce_40034_3005 %>%
   arrange(userID, sesCount, gameLevel, alienID) %>%
   group_by(userID, next_alien_hit) %>%
   summarize(count = n(),
-    avgRT_afterWrong = mean(next_alien_RT, na.rm = T)) %>%
+    avgRT_afterWrong = mean(next_alien_RT, na.rm = T)) %>% #Should probably only include hits and wrongs in RT calculation
   pivot_wider(names_from = "next_alien_hit", values_from = c("count", "avgRT_afterWrong")) %>%
   mutate(n_afterWrong = sum(count_HIT, count_WRONG, count_MISSED, count_NA, na.rm = T),
          accuracy_afterWrong = count_HIT/n_afterWrong)
@@ -562,4 +562,4 @@ afterWrongs <- ayce_40034_3005 %>%
   aggregateSess$DPrime <- (qnorm(aggregateSess$HitRate) - qnorm(aggregateSess$FARate))  
   
 
-  
+#Aggregate everything at the user level  
