@@ -371,6 +371,13 @@ sessionCountDF <- ayce_40034_3005 %>%
     summarize(HITS = n(), 
               complexity_AvgHitRT = mean(reactionTime, na.rm = TRUE), 
               complexity_SDHitRT = sd(reactionTime, na.rm = TRUE))
+  
+      #######Graph complexity (x axis), avg RT (y axis), line per user
+        rt_vs_complexity <- ggplot(data = RT_complexity_user, aes(x = Complexity, y = complexity_AvgHitRT, group = userID,
+                                                                        color = userID)) + 
+         geom_line() + 
+         geom_point() +
+         theme(legend.position = "none")
  
   #Trial counts for Accuracy Pct per complexity level
   Count_complexity_user <- ayce_40034_3005 %>% #all trials per complexity level
