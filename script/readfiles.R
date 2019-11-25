@@ -16,16 +16,25 @@ common_path2 = "C:/Users/samee/Dropbox/NYU-PhD/3. Fall 2019/Messy Data and ML/Fi
       #extracting. csv files from each folder
           files<-paste0(subfolder, "/",list.files(subfolder, pattern = "output_nih_dccs.csv"))
           
+          
       #combining files and selected variables
             df_posttest_DCCS <- files %>% 
               map(function(x) {
                 fread(x,select=c("id","userID", "accessCode", "task","nihScore", "nihAccuracy", "nihRTScore"))
-              }) %>%
+                }) %>%
               reduce(rbind, fill = T)
     
             names(df_posttest_DCCS)<-c("id","userID", "accessCode", "task","post_nihScore", "post_nihAccuracy", "post_nihRTScore")
             write.csv(df_posttest_DCCS,"output/combine_posttestDCCS.csv", row.names = F)
-            
+          #data check
+            total<-0
+            for(i in 1: length(files))
+            {
+              data<-fread(files[[i]])
+              n<-nrow(data)
+              total<-total+n
+            }
+            total==nrow(df_posttest_DCCS)
 -------------
 #1b: Collecting Posttest data for FLANKER
             subfolder3 = list.files(folders, pattern = "FLANKER", full.names=TRUE)
@@ -41,6 +50,15 @@ common_path2 = "C:/Users/samee/Dropbox/NYU-PhD/3. Fall 2019/Messy Data and ML/Fi
             
             names(df_posttest_FLANKER)<-c("id","userID", "accessCode", "task","post_nihScore", "post_nihAccuracy", "post_nihRTScore")
             write.csv(df_posttest_FLANKER,"output/combine_posttest_FLANKER.csv", row.names = F)
+#Data check
+            total2<-0
+            for(i in 1: length(files3))
+            {
+              data2<-fread(files3[[i]])
+              n2<-nrow(data2)
+              total2<-total2+n2
+            }
+            total2==nrow(df_posttest_FLANKER)
 #--------------------            
 #2a. Collecting Pretest Data  for DCCS
       folders2<- list.files(common_path2, pattern = "*_20181221", full.names=TRUE)
@@ -57,6 +75,15 @@ common_path2 = "C:/Users/samee/Dropbox/NYU-PhD/3. Fall 2019/Messy Data and ML/Fi
         reduce(rbind, fill= T)
         names(df_pretest_DCCS)<-c("id","userID", "accessCode", "task","pre_nihScore", "pre_nihAccuracy", "pre_nihRTScore")
               write.csv(df_pretest_DCCS,"output/combine_pretestDCCS.csv", row.names = F)
+#Datacheck
+        total3<-0
+        for(i in 1: length(files2))
+            {
+              data3<-fread(files2[[i]])
+              n3<-nrow(data3)
+                total3<-total3+n3
+              }
+              total3==nrow(df_pretest_DCCS)
 #-----------------------------------------
 #2b. Collecting Pre Test data for FLANKER
               folders4<- list.files(common_path2, pattern = "*_20181221", full.names=TRUE)
@@ -73,6 +100,15 @@ common_path2 = "C:/Users/samee/Dropbox/NYU-PhD/3. Fall 2019/Messy Data and ML/Fi
                 reduce(rbind, fill= T)
               names(df_pretest_FLANKER)<-c("id","userID", "accessCode", "task","pre_nihScore", "pre_nihAccuracy", "pre_nihRTScore")
               write.csv(df_pretest_FLANKER,"output/combine_pretest_FLANKER.csv", row.names = F)
+ #Data Check             
+              total4<-0
+              for(i in 1: length(files4))
+              {
+                data4<-fread(files4[[i]])
+                n4<-nrow(data4)
+                total4<-total4+n4
+              }
+              total4==nrow(df_pretest_FLANKER)
 #------------------------------------------------
 #3a. inner joining pretest and post test FOR DCCS
       df_posttest_DCCS<-filter(df_posttest_DCCS, !is.na(userID))
@@ -94,10 +130,9 @@ common_path2 = "C:/Users/samee/Dropbox/NYU-PhD/3. Fall 2019/Messy Data and ML/Fi
       res
       write.csv(res,"output/Corelation_DCCS.csv", row.names = T)
       
-       #FLANKER
+     #FLANKER
       cor_data_FLANKER<-select(combined_file_FLANKER,pre_nihScore, pre_nihAccuracy,pre_nihRTScore ,post_nihScore, post_nihAccuracy, post_nihRTScore)
       res2<-cor(cor_data_FLANKER[,1:3],cor_data_FLANKER[,4:6])
       res2
       write.csv(res2,"output/Corelation_FLANKER.csv", row.names = T)
       
-      ################################### FLANKER ################################################################
