@@ -286,7 +286,16 @@ sessionCountDF <- ayce_40034_3005 %>%
   complexity <- read_csv("data/FA2018_Intervention_Complexity.csv")
   ayce_40034_3005 <- left_join(ayce_40034_3005, complexity[, c("gameLevelShort", "Complexity")], by = c("gameLevelShort"))
   
-#write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv")  
+  ayce_40034_3005 <- ayce_40034_3005 %>%
+    mutate(Difficulty = case_when(Complexity < 3 ~ "Easy", 
+                                  Complexity >=3 & Complexity < 6 ~ "Medium",
+                                  Complexity > 5 ~ "Difficult" ),
+           Difficulty = factor(Difficulty, levels = c("Easy", "Medium", "Difficult"), ordered = T))
+  #Check
+  #table(ayce_40034_3005$Complexity, ayce_40034_3005$Difficulty)
+  
+  
+write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv")  
 #######  
   #Variables per user
   fastestHits_user <- ayce_40034_3005 %>%
@@ -317,11 +326,25 @@ sessionCountDF <- ayce_40034_3005 %>%
   
   #Total time played (seconds) per user
   totalTimePlayed_user <- ayce_40034_3005 %>%
-    group_by(userID) %>%
+    group_by(userID, sesID, gsUserID, gameLevel, gameLevelShort) %>%
     summarize(
       max = max(logTimestamp),
       min = min(logTimestamp),
-      TimePlayed_user = difftime(max(logTimestamp), min(logTimestamp), units = "secs")) 
+      TimePlayedSubtotal = difftime(max(logTimestamp), min(logTimestamp), units = "secs")) %>%
+    select(-c("max", "min", "sesID", "gsUserID", "gameLevel")) %>%
+    mutate(
+      TimePlayedSubtotal = ifelse(is.infinite(TimePlayedSubtotal), 0, TimePlayedSubtotal)) %>%
+    ungroup() %>%
+    left_join(complexity[, c("gameLevelShort", "Complexity")], by = c("gameLevelShort")) %>%
+    mutate(Difficulty = case_when(Complexity < 3 ~ "Easy", #1 and 2
+                                  Complexity >=3 & Complexity < 6 ~ "Medium", #3, 4, and 5
+                                  Complexity > 5 ~ "Difficult" ), #6 and 7
+           Difficulty = factor(Difficulty, levels = c("Easy", "Medium", "Difficult"), ordered = T)) %>%
+    group_by(userID) %>%
+    summarize(
+      timePlayed_difficulty = as.character(sum(TimePlayedSubtotal, na.rm = TRUE)) 
+    )
+  
   
   HitCount_user <- ayce_40034_3005 %>% #Hits
     group_by(userID)  %>%
@@ -366,7 +389,7 @@ sessionCountDF <- ayce_40034_3005 %>%
     mutate(RuleChange_Accuracy_Pct = round(first_count_correct/first_count), 2)
   
   #Avg Reaction time per complexity level
-  RT_complexity_user <- ayce_40034_3005 %>% #Hits
+  RT_complexity_user_long <- ayce_40034_3005 %>% #Hits
     group_by(userID, Complexity)  %>%
     filter(hitType == "HIT") %>%
     summarize(HITS_comp = n(), 
@@ -374,11 +397,15 @@ sessionCountDF <- ayce_40034_3005 %>%
               Hit_SDRT_comp = sd(reactionTime, na.rm = TRUE))
   
       #######Graph complexity (x axis), avg RT (y axis), line per user
-        rt_vs_complexity <- ggplot(data = RT_complexity_user, aes(x = Complexity, y = complexity_AvgHitRT, group = userID,
+        rt_vs_complexity <- ggplot(data = RT_complexity_user_long, aes(x = Complexity, y = complexity_AvgHitRT, group = userID,
                                                                         color = userID)) + 
          geom_line() + 
          geom_point() +
          theme(legend.position = "none")
+        
+  #Get RT complexity in wide format to join later
+        RT_complexity_user <- pivot_wider(data = RT_complexity_user_long, names_from = "Complexity", 
+                                          values_from = c("HITS_comp", "Hit_AvgRT_comp", "Hit_SDRT_comp"))
  
   #Trial counts for Accuracy Pct per complexity level
   Count_complexity_user <- ayce_40034_3005 %>% #all trials per complexity level
@@ -386,21 +413,26 @@ sessionCountDF <- ayce_40034_3005 %>%
     summarize(complexityTrialCount = n())
   
   #Hits for Accuracy Pct per complexity level
-  Accuracy_complexity_user <- ayce_40034_3005 %>% #Hits
+  Accuracy_complexity_user_long <- ayce_40034_3005 %>% #Hits
     group_by(userID, Complexity)  %>%
     filter(hitType == "HIT") %>%
     summarize(Complexity_Hits = n())
   
-  Accuracy_complexity_user <- left_join(Count_complexity_user, Accuracy_complexity_user, by = c("userID", "Complexity")) %>%
+  Accuracy_complexity_user_long <- left_join(Count_complexity_user, Accuracy_complexity_user_long, by = c("userID", "Complexity")) %>%
     mutate(Accuracy_Pct_comp = Complexity_Hits/complexityTrialCount) %>%
     filter(!userID %in% badUsers)
   
       #######Graph complexity (x axis), accuracy % (y axis), line per user
-      accuracy_vs_complexity <- ggplot(data = Accuracy_complexity_user, aes(x = Complexity, y = Complexity_Accuracy_Pct, group = userID,
+      accuracy_vs_complexity <- ggplot(data = Accuracy_complexity_user_long, aes(x = Complexity, y = Complexity_Accuracy_Pct, group = userID,
                                        color = userID)) + 
         geom_line() + 
         geom_point() +
         theme(legend.position = "none")
+      
+      #Wide format to join later
+      Accuracy_complexity_user <- pivot_wider(data = Accuracy_complexity_user_long, names_from = "Complexity", 
+                                        values_from = c("complexityTrialCount", "Complexity_Hits", "Accuracy_Pct_comp"))
+      
   
 #Accuracy for beginning, middle, end of session
       #Get average complexity for each section just for reference as well? 
@@ -427,10 +459,10 @@ Accuracy_vs_timeChunk <- left_join(third_count_DF, accuracy_thirds, by = c("user
 
     ######Graph how users do at the beginning, middle, and end of sessions; can account for average complexity
     #facet by sesCount
-Accuracy_vs_timeChunk_plot <- ggplot( data = Accuracy_vs_timeChunk, aes(x = factor(session_thirds), y = third_accuracy, group = userID, color = avgComplexity)) +
-  geom_line() + 
-  geom_point() + 
-  facet_grid(~ sesCount)
+    Accuracy_vs_timeChunk_plot <- ggplot( data = Accuracy_vs_timeChunk, aes(x = factor(session_thirds), y = third_accuracy, group = userID, color = avgComplexity)) +
+      geom_line() + 
+      geom_point() + 
+      facet_grid(~ sesCount)
 
 
 
@@ -504,17 +536,25 @@ write.csv(aggregate, "data/aggregate_user.csv")
   
   #Total time played (seconds) per user per session
   totalTimePlayed_sess <- ayce_40034_3005 %>%
-    group_by(userID, sesCount) %>%
+    group_by(userID, sesID, gsUserID, sesCount, gameLevel, gameLevelShort) %>%
     summarize(
       max = max(logTimestamp),
       min = min(logTimestamp),
       TimePlayedSubtotal = difftime(max(logTimestamp), min(logTimestamp), units = "secs")) %>%
+    select(-c("max", "min", "sesID", "gsUserID", "gameLevel")) %>%
     mutate(
       TimePlayedSubtotal = ifelse(is.infinite(TimePlayedSubtotal), 0, TimePlayedSubtotal)) %>%
+    ungroup() %>%
+    left_join(complexity[, c("gameLevelShort", "Complexity")], by = c("gameLevelShort")) %>%
+    mutate(Difficulty = case_when(Complexity < 3 ~ "Easy", #1 and 2
+                                  Complexity >=3 & Complexity < 6 ~ "Medium", #3, 4, and 5
+                                  Complexity > 5 ~ "Difficult" ), #6 and 7
+           Difficulty = factor(Difficulty, levels = c("Easy", "Medium", "Difficult"), ordered = T)) %>%
     group_by(userID, sesCount) %>%
     summarize(
       timePlayed_sess = as.character(sum(TimePlayedSubtotal, na.rm = TRUE)) 
     )
+  
   
   HitCount_sess <- ayce_40034_3005 %>% #Hits
     group_by(userID, sesCount)  %>%
@@ -578,13 +618,6 @@ write.csv(aggregate, "data/aggregate_user.csv")
   #Variables per user per complexity (translated to Difficulty as easy, medium, hard)
   #table(ayce_40034_3005$Complexity)
 
-  ayce_40034_3005 <- ayce_40034_3005 %>%
-    mutate(Difficulty = case_when(Complexity < 3 ~ "Easy", 
-                                  Complexity >=3 & Complexity < 6 ~ "Medium",
-                                  Complexity > 5 ~ "Difficult" ),
-           Difficulty = factor(Difficulty, levels = c("Easy", "Medium", "Difficult"), ordered = T))
-  #Check
-  #table(ayce_40034_3005$Complexity, ayce_40034_3005$Difficulty)
   
   #Fastest hits per user per difficulty
   fastestHits_diff <- ayce_40034_3005 %>%
@@ -598,8 +631,8 @@ write.csv(aggregate, "data/aggregate_user.csv")
     summarize(highestLevel_diff = max(gameLevel, na.rm = TRUE))
   
   #Filter rows to get counts of trials within the highest level (per user per difficulty)
-  highestLevelCounts_diff <- ayce_40034_3005 %>%
-    filter (gameLevel == sessionHighestLevel) %>%
+  highestLevelCounts_diff <- left_join(ayce_40034_3005, highestLevels_diff, by = c("userID", "Difficulty") ) %>%
+    filter (gameLevel == highestLevel_diff) %>%
     group_by(userID, Difficulty) %>%
     summarize(highestLevelTrialCount_diff = n()) 
   
@@ -608,20 +641,34 @@ write.csv(aggregate, "data/aggregate_user.csv")
     group_by(userID, Difficulty)  %>%
     summarize(trialCount_diff = n())
   
-  #Number of levels played per user per session
+  #Number of levels played per user per difficulty
   levelsTotals_diff <- ayce_40034_3005 %>%
     group_by(userID, Difficulty) %>%
     summarize(nLevels_diff = n_distinct(gameLevel)) 
   
-  #Total time played (seconds) per user per session
+  #Total time played (seconds) per user per difficulty #this isn't right yet. 
   totalTimePlayed_diff <- ayce_40034_3005 %>%
-    group_by(userID, Difficulty) %>%
+    group_by(userID, sesID, gsUserID, gameLevel, gameLevelShort) %>%
     summarize(
       max = max(logTimestamp),
       min = min(logTimestamp),
-      timePlayed_difficulty = difftime(max(logTimestamp), min(logTimestamp), units = "secs"))
-  
-  HitCount_diff <- AYCET_40034 %>% #Hits
+      TimePlayedSubtotal = difftime(max(logTimestamp), min(logTimestamp), units = "secs")) %>%
+    select(-c("max", "min", "sesID", "gsUserID", "gameLevel")) %>%
+    mutate(
+      TimePlayedSubtotal = ifelse(is.infinite(TimePlayedSubtotal), 0, TimePlayedSubtotal)) %>%
+    ungroup() %>%
+    left_join(complexity[, c("gameLevelShort", "Complexity")], by = c("gameLevelShort")) %>%
+    mutate(Difficulty = case_when(Complexity < 3 ~ "Easy", #1 and 2
+                                  Complexity >=3 & Complexity < 6 ~ "Medium", #3, 4, and 5
+                                  Complexity > 5 ~ "Difficult" ), #6 and 7
+           Difficulty = factor(Difficulty, levels = c("Easy", "Medium", "Difficult"), ordered = T)) %>%
+    group_by(userID, Difficulty) %>%
+    summarize(
+      timePlayed_difficulty = as.character(sum(TimePlayedSubtotal, na.rm = TRUE)) 
+    )
+
+      
+  HitCount_diff <- ayce_40034_3005 %>% #Hits
     group_by(userID, Difficulty)  %>%
     filter(hitType == "HIT") %>%
     summarize(HITS_diff = n(), 
@@ -629,7 +676,7 @@ write.csv(aggregate, "data/aggregate_user.csv")
               Hit_SDRT_diff = sd(reactionTime, na.rm = TRUE)) 
   
   #Calculate misses per user and session
-  MissCount_diff <- AYCET_40034 %>% #Misses
+  MissCount_diff <- ayce_40034_3005 %>% #Misses
     group_by(userID, Difficulty)  %>%
     filter(hitType == "MISSED") %>%
     summarize(MISSED_diff = n(), 
@@ -637,7 +684,7 @@ write.csv(aggregate, "data/aggregate_user.csv")
               Miss_SDRT_diff = sd(reactionTime, na.rm = TRUE)) 
   
   #Calculate wrongs per user and session
-  WrongCount_diff <- AYCET_40034 %>% #Wrongs
+  WrongCount_diff <- ayce_40034_3005 %>% #Wrongs
     group_by(userID, Difficulty)  %>%
     filter(hitType == "WRONG") %>%
     summarize(WRONG_diff = n(), 
@@ -677,10 +724,20 @@ write.csv(aggregate, "data/aggregate_user.csv")
                                                            "highestLevelPct_diff", "percentCorrect_diff", "HitRate_diff", "FARate_diff",
                                                            "DPrime_diff"))
  
-  
+write.csv(aggregateDiffWide, "data/aggregate_difficulty.csv")  
 #Aggregate everything at the user level  
-  aggregatedList <- list(aggregate, aggregateSessWide, aggregateDiffWide)
-  gameplay_aggregated <- reduce(aggregatedList, full_join, by = c("userID"))
+aggregate <- arrange(aggregate, accessCode, userID)
+aggregateDiffWide <- arrange(aggregateDiffWide, accessCode, userID)
+aggregateSessWide <- arrange(aggregateSessWide, accessCode, userID)
+
+
+gameplay_aggregated <- bind_cols(aggregate, aggregateDiffWide[,3:62])
+gameplay_aggregated <- bind_cols(gameplay_aggregated, aggregateSessWide[,3:122])
+
+
+#too many NAs to work
+#  aggregatedList <- list(aggregate, aggregateSessWide, aggregateDiffWide)
+#  gameplay_aggregated <- reduce(aggregatedList, full_join, by = c("accessCode", "userID"))
   
 #Export
   write.csv(gameplay_aggregated, "data/AYCET_gameplay_aggregated.csv")
