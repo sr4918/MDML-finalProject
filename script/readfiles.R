@@ -3,10 +3,23 @@
 library(tidyverse)
 library(data.table)
 library(dplyr)
+library(corr)
+library(GGally)
 #setwd("C:/Users/samee/Dropbox/NYU-PhD/3. Fall 2019/Messy Data and ML/Final Project/MDML-finalProject")
 #setwd("C:/Users/samee/Dropbox/NYU-PhD/3. Fall 2019/Messy Data and ML/Final Project/data/Posttest/FA18UCP1_20181221/DCCS")
 common_path = "C:/Users/samee/Dropbox/NYU-PhD/3. Fall 2019/Messy Data and ML/Final Project/data/Posttest"
 common_path2 = "C:/Users/samee/Dropbox/NYU-PhD/3. Fall 2019/Messy Data and ML/Final Project/data/Pretest"
+badUsers <- c(115,   
+              132,
+              17214:17228,
+              17191:17213,
+              17348,
+              17386,
+              17393,
+              17394,
+              18128,
+              18129,
+              18536)
 
 #1a Collecting post test data FOR DCCS
       #hardcoding paths of files that were different
@@ -113,26 +126,13 @@ common_path2 = "C:/Users/samee/Dropbox/NYU-PhD/3. Fall 2019/Messy Data and ML/Fi
 #3a. inner joining pretest and post test FOR DCCS
       df_posttest_DCCS<-filter(df_posttest_DCCS, !is.na(userID))
       combined_file<-inner_join(df_pretest_DCCS, df_posttest_DCCS, by = "userID")
+      combined_file<-filter(combined_file, !userID %in% badUsers)
       write.csv(combined_file,"output/combine_pre-post_DCCS.csv", row.names = F)
 
 #3b. inner joining pretest and post test FOR FLANKER
       df_posttest_FLANKER<-filter(df_posttest_FLANKER, !is.na(userID))
       combined_file_FLANKER<-inner_join(df_pretest_FLANKER, df_posttest_FLANKER, by = "userID")
+      combined_file_FLANKER<-filter(combined_file_FLANKER, !userID %in% badUsers)
       write.csv(combined_file_FLANKER,"output/combine_pre-post_FLANKER.csv", row.names = F)
 #-------------------------------     
-      
-#4 Analysis:
-# Co relation matrix between pre_nihScore against post_nihSore, pre_nihAccuracy against post_nihAccuracy,
-      #pre_nihRTScore against post nihRTScore
-      #DCCS:
-      cor_data_DCCS<-select(combined_file,pre_nihScore, pre_nihAccuracy,pre_nihRTScore ,post_nihScore, post_nihAccuracy, post_nihRTScore)
-      res<-cor(cor_data_DCCS[,1:3],cor_data_DCCS[,4:6])
-      res
-      write.csv(res,"output/Corelation_DCCS.csv", row.names = T)
-      
-     #FLANKER
-      cor_data_FLANKER<-select(combined_file_FLANKER,pre_nihScore, pre_nihAccuracy,pre_nihRTScore ,post_nihScore, post_nihAccuracy, post_nihRTScore)
-      res2<-cor(cor_data_FLANKER[,1:3],cor_data_FLANKER[,4:6])
-      res2
-      write.csv(res2,"output/Corelation_FLANKER.csv", row.names = T)
       
