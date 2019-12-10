@@ -12,15 +12,15 @@ library(ggpubr)
 #pre_nihRTScore against post nihRTScoo_re
 
 #DCCS:
-      data<-read.csv("output/combine_pre-post_DCCS.csv")
+      data<-read.csv("data/combine_pre-post_DCCS.csv")
      
       cor_data_DCCS<-select(data,pre_nihScore, pre_nihAccuracy,pre_nihRTScore ,post_nihScore, post_nihAccuracy, post_nihRTScore)
-     
+      names(cor_data_DCCS)<-c("pre_TScore", "pre_Acc", "pre_ReactionT", "post_TScore", "post_Acc", "post_ReactionT")
+      
       #pre against post scores co relation
       res<-cor(cor_data_DCCS[,1:3],cor_data_DCCS[,4:6])
       res
       write.csv(res,"output/Corelation_DCCS.csv", row.names = T)
-      names(cor_data_DCCS)<-c("pre_TScore", "pre_Acc", "pre_ReactionT", "post_TScore", "post_Acc", "post_ReactionT")
 
       #multiple scatter plots visualization
       DCCS_scatterplot<- ggpairs(cor_data_DCCS,title="DCCS Pre and Post Test Scores", aes(fill = "pink"))
@@ -34,13 +34,12 @@ library(ggpubr)
       res2<-cor(cor_data_FLANKER[,1:3],cor_data_FLANKER[,4:6])
       res2
       write.csv(res2,"output/Corelation_FLANKER.csv", row.names = T)
-      ggpairs(cor_data_FLANKER,title="FLANKER Pre and Post Test Scores", aes(fill = "blue"))
-      FLANKER_scatterplot<- ggpairs(cor_data_FLANKER,title="FLANKER Pre and Post Test Scores", aes(fill = "blue"))
+      FLANKER_scatterplot<- pairs(cor_data_FLANKER,title="FLANKER Pre and Post Test Scores", aes(fill = "blue"))
       ggsave("output/FLANKER_prepost_scatterplot.png",FLANKER_scatterplot)
 
 
-### DCCS PLOTS
-      DCCS<-data %>% select(userID, pre_nihScore, post_nihScore, pre_nihAccuracy, post_nihAccuracy,pre_nihRTScore,post_nihRTScore) %>%
+### DCCS PLOTS #477 rows of data
+      DCCS<-data %>% select(userID, pre_nihScore, post_nihScore, pre_nihAccuracy, post_nihAccuracy,pre_nihRTScore,post_nihRTScore,dateTime.x,dateTime.y) %>%
         filter(complete.cases(.)) %>%
         mutate(DiffScore = post_nihScore - pre_nihScore,
                DiffAccuracy =post_nihAccuracy- pre_nihAccuracy,

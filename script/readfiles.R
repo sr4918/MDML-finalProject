@@ -1,5 +1,6 @@
 #This is a test script file to read selected variables from pretest and post test folders containg DCCS and Flanker
 #data
+
 library(tidyverse)
 library(data.table)
 library(dplyr)
@@ -33,12 +34,16 @@ badUsers <- c(115,
       #combining files and selected variables
             df_posttest_DCCS <- files %>% 
               map(function(x) {
-                fread(x,select=c("id","userID", "accessCode", "task","nihScore", "nihAccuracy", "nihRTScore"))
+                fread(x,select=c("id","userID", "accessCode", "task","nihScore", "nihAccuracy", "nihRTScore", "dataTimestamp"))
                 }) %>%
               reduce(rbind, fill = T)
     
-            names(df_posttest_DCCS)<-c("id","userID", "accessCode", "task","post_nihScore", "post_nihAccuracy", "post_nihRTScore")
-            write.csv(df_posttest_DCCS,"output/combine_posttestDCCS.csv", row.names = F)
+            names(df_posttest_DCCS)<-c("id","userID", "accessCode", "task","post_nihScore", "post_nihAccuracy", "post_nihRTScore", "dateTime")
+            
+            #remove duplicate attempts of post test with just the first one
+            df_posttest_DCCS<-df_posttest_DCCS%>%group_by(userID)%>%arrange(dateTime)%>%slice(1)
+            write.csv(df_posttest_DCCS,"output/posttestDCCS.csv", row.names = F)
+            
           #data check
             total<-0
             for(i in 1: length(files))
@@ -83,11 +88,13 @@ badUsers <- c(115,
       #loop over every file in files:
         df_pretest_DCCS <- files2 %>% 
         map(function(x) {
-          fread(x,select=c("id", "userID","accessCode", "task","nihScore", "nihAccuracy", "nihRTScore"))
+          fread(x,select=c("id", "userID","accessCode", "task","nihScore", "nihAccuracy", "nihRTScore","dataTimestamp"))
         }) %>%
         reduce(rbind, fill= T)
-        names(df_pretest_DCCS)<-c("id","userID", "accessCode", "task","pre_nihScore", "pre_nihAccuracy", "pre_nihRTScore")
-              write.csv(df_pretest_DCCS,"output/combine_pretestDCCS.csv", row.names = F)
+        names(df_pretest_DCCS)<-c("id","userID", "accessCode", "task","pre_nihScore", "pre_nihAccuracy", "pre_nihRTScore","dateTime")
+        df_pretest_DCCS<-df_pretest_DCCS%>%group_by(userID)%>%arrange(dateTime)%>%slice(1)
+        
+        write.csv(df_pretest_DCCS,"output/pretestDCCS.csv", row.names = F)
 #Datacheck
         total3<-0
         for(i in 1: length(files2))
@@ -127,7 +134,7 @@ badUsers <- c(115,
       df_posttest_DCCS<-filter(df_posttest_DCCS, !is.na(userID))
       combined_file<-inner_join(df_pretest_DCCS, df_posttest_DCCS, by = "userID")
       combined_file<-filter(combined_file, !userID %in% badUsers)
-      write.csv(combined_file,"output/combine_pre-post_DCCS.csv", row.names = F)
+      write.csv(combined_file,"output/DCCS_PrePostCombinedData.csv", row.names = F)
 
 #3b. inner joining pretest and post test FOR FLANKER
       df_posttest_FLANKER<-filter(df_posttest_FLANKER, !is.na(userID))
