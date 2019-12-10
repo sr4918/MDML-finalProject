@@ -91,6 +91,9 @@ library(ggpubr)
       DCCS$ImproverRT<-ifelse(DCCS$DiffRT >0, T, F)
       DCCS$AllImprove<-ifelse(DCCS$ImproverScore==T &DCCS$ImproverAccuracy==T&DCCS$ImproverRT==T, T, F)
       DCCS$postScore<-ifelse(DCCS$post_nihScore>4, T, F)
+     
+       write.csv(DCCS, "data/ALL_DCCS_data.csv", row.names = F)
+      
       
       FinalLabels<-select(DCCS, userID, ImproverScore, ImproverAccuracy,ImproverRT, AllImprove, postScore)
       write.csv(FinalLabels, "data/UserLabels.csv", row.names = F)
