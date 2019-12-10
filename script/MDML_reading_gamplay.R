@@ -462,8 +462,8 @@ write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)
       
       #######
       #Wide format to join later
-      Accuracy_complexity_user <- pivot_wider(data = Accuracy_complexity_user_long, names_from = "Complexity", 
-                                        values_from = c("complexityTrialCount", "Complexity_Hits", "Accuracy_Pct_comp"))
+      Accuracy_Difficulty_user <- pivot_wider(data = Accuracy_Difficulty_user_long, names_from = "Difficulty", 
+                                        values_from = c("DifficultyTrialCount", "Difficulty_Hits", "Accuracy_Pct_diff"))
       
   
 #Accuracy for beginning, middle, end of session
@@ -495,7 +495,7 @@ Accuracy_vs_timeChunk <- left_join(third_count_DF, accuracy_thirds, by = c("user
       geom_line() + 
       geom_point() + 
       facet_grid(~ sesCount)
-
+    ###### Come back to this -- how to show improvement over time, facet by time on x, complexity on y, color by accuracy or performance
 
 
 #Accuracy & avg RT after Wrongs
@@ -515,7 +515,7 @@ afterWrongs <- ayce_40034_3005 %>%
    #Join hit metrics for user level info
   userList <- list(fastestHits_user, highestLevels_user, highestLevelCounts_user, trialCounts_user, levelTotals_user, 
                              totalTimePlayed_user, HitCount_user, MissCount_user, WrongCount_user, RuleChange_user,
-                              RT_complexity_user, Accuracy_complexity_user, afterWrongs)
+                              RT_Difficulty_user, Accuracy_Difficulty_user, afterWrongs)
   aggregate <- reduce(userList, full_join, by = c("userID"))
   
   #Calculate percent of all trials in highest level by session
@@ -536,7 +536,9 @@ afterWrongs <- ayce_40034_3005 %>%
   #str(aggregateUsers)
   aggregate$DPrime_user <- (qnorm(aggregate$HitRate_user) - qnorm(aggregate$FARate_user))  
     
-write.csv(aggregate, "data/aggregate_user.csv", row.names = F)  
+#write.csv(aggregate, "data/aggregate_user.csv", row.names = F)  
+  write.csv(aggregate, "Desktop/MDML/MDML-finalProject/MDML-finalProject/data/aggregate_user.csv", row.names = F)  
+
 #########  
 #Variables per user per session
   #Fastest hits per user per session
