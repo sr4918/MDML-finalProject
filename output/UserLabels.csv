@@ -1,4 +1,4 @@
-userID,ImproverScore,ImproverAccuracy,ImproverRT,AllImprove,postScore
+"userID","ImproverScore","ImproverAccuracy","ImproverRT","AllImprove","postScore"
 17652,FALSE,FALSE,FALSE,FALSE,FALSE
 16932,TRUE,FALSE,TRUE,FALSE,TRUE
 16934,TRUE,TRUE,TRUE,TRUE,TRUE
