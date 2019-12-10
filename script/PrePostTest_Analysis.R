@@ -86,13 +86,16 @@ library(ggpubr)
       ggsave("images/PrePostPlots.png", t2)
       
       #see how many get a score mre than 4 on DCCS
-      DCCS$ImproverScore<-ifelse(DCCS$DiffScore>0, T, F)
-      DCCS$ImproverAccuracy<-ifelse(DCCS$DiffAccuracy>0, T, F)
-      DCCS$ImproverRT<-ifelse(DCCS$DiffRT >0, T, F)
-      DCCS$AllImprove<-ifelse(DCCS$ImproverScore==T &DCCS$ImproverAccuracy==T&DCCS$ImproverRT==T, T, F)
-      DCCS$postScore<-ifelse(DCCS$post_nihScore>4, T, F)
+      DCCS$ImproverScore<-ifelse(DCCS$DiffScore>0, 1, 0)
+      DCCS$ImproverAccuracy<-ifelse(DCCS$DiffAccuracy>0, 1, 0)
+      DCCS$ImproverRT<-ifelse(DCCS$DiffRT >0, 1, 0)
+      DCCS$AllImprove<-ifelse(DCCS$ImproverScore==1 &DCCS$ImproverAccuracy==1&DCCS$ImproverRT==1, 1, 0)
+      DCCS$ImprovedPostScoreGT7<-ifelse(DCCS$post_nihScore>7.2, 1, 0)
+     
+      write.csv(DCCS, "data/ALL_DCCS_data.csv", row.names = F)
       
-      FinalLabels<-select(DCCS, userID, ImproverScore, ImproverAccuracy,ImproverRT, AllImprove, postScore)
-      write.csv(FinalLabels, "data/UserLabels.csv", row.names = F)
-      sum(FinalLabels$postScore==T)
+      
+      #FinalLabels<-select(DCCS, userID, ImproverScore, ImproverAccuracy,ImproverRT, AllImprove, postScore)
+      #write.csv(FinalLabels, "data/UserLabels.csv", row.names = F)
+      #sum(FinalLabels$postScore==T)
       
