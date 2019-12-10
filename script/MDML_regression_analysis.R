@@ -8,14 +8,52 @@ require(glmnet)
 #For Lasso regression 
 
 #Read in AYCET gameplay data and DCCS data
-AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv")
+AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") 
+#Find & get rid of '2' column
+AYCET_gameplay_aggregated <- AYCET_gameplay_aggregated %>%
+    #select(-c("2", "X1"))
+    #select(-c("X1"))
+    #select(-c("avgRT_afterWrong_NA"))
+    
+
 ALL_DCCS_data <- read_csv("data/ALL_DCCS_data.csv")
 
 
 #Merge by userID so each row represents one participant
 AYCET_DCCS <- left_join(AYCET_gameplay_aggregated, ALL_DCCS_data, by = c("userID"))
 
-table(AYCET_DCCS$userID)
+AYCET_DCCS <- AYCET_DCCS %>%
+  #select(-c("avgRT_afterWrong_NA")) %>%
+  select(-c("accessCode", "userID")) %>%
+  select(-c("highestLevel_user" ,
+            "highestLevel_diff_Easy" ,
+            "highestLevel_diff_Medium" , 
+            "highestLevel_diff_Difficult" ,
+            "highestLevel_sess_1" ,
+            "highestLevel_sess_2" ,
+            "highestLevel_sess_3" ,
+            "highestLevel_sess_4" ,
+            "highestLevel_sess_5" ,
+            "highestLevel_sess_6")) %>%
+ mutate(ImproverScore = case_when(ImproverScore == TRUE ~ 1, 
+                                  ImproverScore == FALSE ~ 0)) %>%
+  select(-c("ImproverAccuracy", "ImproverRT", "AllImprove", "postScore"))
+
+#Change characters to ordered factors
+AYCET_DCCS <- AYCET_DCCS %>%
+  mutate(highestLevel_user ,
+         highestLevel_diff_Easy ,
+         highestLevel_diff_Medium , 
+         highestLevel_diff_Difficult ,
+         highestLevel_sess_1 ,
+         highestLevel_sess_2 ,
+         highestLevel_sess_3 ,
+         highestLevel_sess_4 ,
+         highestLevel_sess_5 ,
+         highestLevel_sess_6)
+
+#colnames(AYCET_DCCS)
+
 #check that each row is a unique participant
 count <- AYCET_DCCS %>%
   group_by(userID) %>%
@@ -58,7 +96,13 @@ perf.lasso <- performance(pred_lasso,'auc')
 cat(perf.lasso@y.values[[1]])
 ###########################
   
+#Need to remove variables with many NAs
 #Lasso 1: Which variables are associated with improvement in NIH Score?
+
+LassoNIHScore <- model.matrix(ImproverScore ~ ., AYCET_DCCS)[,-1]
+
+
+ImproverScore
 
 #Lasso 2: Which variables are associated with high accuracy at the end?
 
