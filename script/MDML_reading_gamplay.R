@@ -11,7 +11,8 @@ require(compareDF)
 #install.packages("sqldf")
 require(sqldf)
 
-
+setwd("corinnebrenner")
+getwd()
 ####
 
 #length(unique(ayce_40034_3005Edit$userID))
@@ -29,13 +30,17 @@ accessCodes <- c("ATHBF18", "ATHF18", "ATM1F18", "ATMBF18")
 
 #4003
 filepaths_4003 <- expand.grid(x=accessCodes) %>% 
-{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
+#{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
+{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
+
 
 ayce_4003 <- do.call(rbind, lapply(filepaths_4003, read_csv))
 
 #4004
 filepaths_4004 <- expand.grid(x=accessCodes) %>% 
-{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
+#{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
+{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
+
 
 ayce_4004 <- do.call(rbind, lapply(filepaths_4004, read_csv))
 
@@ -167,7 +172,9 @@ ayce_40034 <- merge(ayce_4003, ayce_4004[,c("accessCode", "userID", "sesID", "gs
 
 #3005
 filepaths_3005 <- expand.grid(x=accessCodes) %>% 
-{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3005.csv')}
+#{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3005.csv')}
+{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3005.csv')}
+
 
 ayce_3005 <- do.call(rbind, lapply(filepaths_3005, read_csv))
 
@@ -231,7 +238,7 @@ ayce_3005_3 <- ayce_3005 %>%
          waveType = factor(waveType)
   )
 
-#Add a lower bound and upper bound timestamp so you can jointo 40034 based on time
+#Add a lower bound and upper bound timestamp so you can join 3005 to 40034 based on time
 ayce_3005_3$lowerBound <- (ayce_3005_3$logTimestamp - 1)
 ayce_3005_3$upperBound <- lead(ayce_3005_3$logTimestamp)
 
@@ -261,14 +268,15 @@ ayce_40034_3005 <- ayce_40034_3005 %>%
   arrange(accessCode, userID, sesID, gsUserID, gameKey, gameLevel, alienID) %>%
   filter(!userID %in% badUsers)
 
-  #Still has 10 extra rows but I don't know how to find them...
 ##############
 #Add needed variables for further analysis
+
+#Create a short game level label that excludes the last 
 ayce_40034_3005 <- ayce_40034_3005 %>%
   mutate(gameLevelShort = gsub('-[^-]*$', '', gameLevel),
           date = as.Date(logTimestamp, tz = ""))
   
-#Create a new session count by date 
+#Create a new session count using date information, not just sessionID, which creates a new session every time a participant logs in
 sessionCountDF <- ayce_40034_3005 %>%
   arrange(userID, date, sesID, logTimestamp, gsUserID, gameLevelShort, gameLevel, alienID) %>%
   group_by(userID, date, sesID, gsUserID) %>%
@@ -280,12 +288,15 @@ sessionCountDF <- ayce_40034_3005 %>%
           sesCount = dense_rank(date)) %>% #Combines sessionIDs by date
   ungroup()
   
+  #Join new session count variable in to main dataset
   ayce_40034_3005 <- left_join(ayce_40034_3005, sessionCountDF[, c("userID", "date", "sesID", "gsUserID", "sesCount", "sesCountAll")], by = c("userID", "date", "sesID", "gsUserID"))
   
-  #Import & merge complexity information
-  complexity <- read_csv("data/FA2018_Intervention_Complexity.csv")
+  #Import & merge information about the complexity of each game level (as assigned by game designer)
+  complexity <- read_csv("Desktop/MDML/MDML-finalProject/MDML-finalProject/data/FA2018_Intervention_Complexity.csv")
+  #complexity <- read_csv("data/FA2018_Intervention_Complexity.csv")
   ayce_40034_3005 <- left_join(ayce_40034_3005, complexity[, c("gameLevelShort", "Complexity")], by = c("gameLevelShort"))
   
+  #Relabel complexity levels into fewer 'difficulty' categories to streamline analyses
   ayce_40034_3005 <- ayce_40034_3005 %>%
     mutate(Difficulty = case_when(Complexity < 3 ~ "Easy", 
                                   Complexity >=3 & Complexity < 6 ~ "Medium",
@@ -294,7 +305,7 @@ sessionCountDF <- ayce_40034_3005 %>%
   #Check
   #table(ayce_40034_3005$Complexity, ayce_40034_3005$Difficulty)
   
-  
+
 write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)  
 #######  
   #Variables per user
@@ -386,7 +397,7 @@ write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)
       summarize(first_count_correct = n())
   
   RuleChange_user <- left_join(RuleChange_user, RuleChange_user_correct, by = c("userID")) %>%
-    mutate(RuleChange_Accuracy_Pct = round(first_count_correct/first_count), 2)
+    mutate(RuleChange_Accuracy_Pct = round(first_count_correct/first_count, 2))
   
   #Avg Reaction time per complexity level
   RT_complexity_user_long <- ayce_40034_3005 %>% #Hits
@@ -397,11 +408,28 @@ write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)
               Hit_SDRT_comp = sd(reactionTime, na.rm = TRUE))
   
       #######Graph complexity (x axis), avg RT (y axis), line per user
-        rt_vs_complexity <- ggplot(data = RT_complexity_user_long, aes(x = Complexity, y = complexity_AvgHitRT, group = userID,
+        rt_vs_complexity <- ggplot(data = RT_complexity_user_long, aes(x = Complexity, y = Hit_AvgRT_comp, group = userID,
                                                                         color = userID)) + 
          geom_line() + 
          geom_point() +
          theme(legend.position = "none")
+        
+        
+        RT_diff_user_long <- ayce_40034_3005 %>% #Hits
+          group_by(userID, Difficulty)  %>%
+          filter(hitType == "HIT") %>%
+          summarize(HITS_diff = n(), 
+                    Hit_AvgRT_diff = mean(reactionTime, na.rm = TRUE), 
+                    Hit_SDRT_diff = sd(reactionTime, na.rm = TRUE))
+        
+        rt_vs_difficulty <- ggplot(data = RT_diff_user_long, aes(x = Difficulty, y = Hit_AvgRT_diff, group = userID,
+                                                                       color = userID)) + 
+          geom_line() + 
+          geom_point() +
+          theme(legend.position = "none") + 
+          labs(y = "Average Reaction Time (for Hits)", title = "Average Reaction Time versus Level Difficulty \nper Participant")
+          ggsave("Desktop/MDML/MDML-finalProject/MDML-finalProject/images/rt_vs_difficulty.png", rt_vs_difficulty)
+        
         
   #Get RT complexity in wide format to join later
         RT_complexity_user <- pivot_wider(data = RT_complexity_user_long, names_from = "Complexity", 
