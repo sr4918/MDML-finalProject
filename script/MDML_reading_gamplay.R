@@ -428,35 +428,39 @@ write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)
           geom_point() +
           theme(legend.position = "none") + 
           labs(y = "Average Reaction Time (for Hits)", title = "Average Reaction Time versus Level Difficulty \nper Participant")
-          ggsave("Desktop/MDML/MDML-finalProject/MDML-finalProject/images/rt_vs_difficulty.png", rt_vs_difficulty)
-        
+          #ggsave("Desktop/MDML/MDML-finalProject/MDML-finalProject/images/rt_vs_difficulty.png", rt_vs_difficulty)
+          ####### 
         
   #Get RT complexity in wide format to join later
-        RT_complexity_user <- pivot_wider(data = RT_complexity_user_long, names_from = "Complexity", 
-                                          values_from = c("HITS_comp", "Hit_AvgRT_comp", "Hit_SDRT_comp"))
+        RT_Difficulty_user <- pivot_wider(data = RT_diff_user_long, names_from = "Difficulty", 
+                                          values_from = c("HITS_diff", "Hit_AvgRT_diff", "Hit_SDRT_diff"))
  
-  #Trial counts for Accuracy Pct per complexity level
-  Count_complexity_user <- ayce_40034_3005 %>% #all trials per complexity level
-    group_by(userID, Complexity)  %>%
-    summarize(complexityTrialCount = n())
+  #Trial counts for Accuracy Pct per Difficulty level
+  Count_Difficulty_user <- ayce_40034_3005 %>% #all trials per complexity level
+    group_by(userID, Difficulty)  %>%
+    summarize(DifficultyTrialCount = n())
   
   #Hits for Accuracy Pct per complexity level
-  Accuracy_complexity_user_long <- ayce_40034_3005 %>% #Hits
-    group_by(userID, Complexity)  %>%
+  Accuracy_Difficulty_user_long <- ayce_40034_3005 %>% #Hits
+    group_by(userID, Difficulty)  %>%
     filter(hitType == "HIT") %>%
-    summarize(Complexity_Hits = n())
+    summarize(Difficulty_Hits = n())
   
-  Accuracy_complexity_user_long <- left_join(Count_complexity_user, Accuracy_complexity_user_long, by = c("userID", "Complexity")) %>%
-    mutate(Accuracy_Pct_comp = Complexity_Hits/complexityTrialCount) %>%
+  Accuracy_Difficulty_user_long <- left_join(Count_Difficulty_user, Accuracy_Difficulty_user_long, by = c("userID", "Difficulty")) %>%
+    mutate(Accuracy_Pct_diff = Difficulty_Hits/DifficultyTrialCount) %>%
     filter(!userID %in% badUsers)
   
       #######Graph complexity (x axis), accuracy % (y axis), line per user
-      accuracy_vs_complexity <- ggplot(data = Accuracy_complexity_user_long, aes(x = Complexity, y = Complexity_Accuracy_Pct, group = userID,
+      accuracy_vs_Difficulty <- ggplot(data = Accuracy_Difficulty_user_long, aes(x = Difficulty, y = Accuracy_Pct_diff, group = userID,
                                        color = userID)) + 
         geom_line() + 
         geom_point() +
-        theme(legend.position = "none")
+        theme(legend.position = "none") +
+        labs(y = "% Accurate Responses (for Hits)", title = "Accuracy Rate versus Level Difficulty \nper Participant")
+      ggsave("Desktop/MDML/MDML-finalProject/MDML-finalProject/images/acc_vs_difficulty.png", accuracy_vs_Difficulty)
       
+      
+      #######
       #Wide format to join later
       Accuracy_complexity_user <- pivot_wider(data = Accuracy_complexity_user_long, names_from = "Complexity", 
                                         values_from = c("complexityTrialCount", "Complexity_Hits", "Accuracy_Pct_comp"))
