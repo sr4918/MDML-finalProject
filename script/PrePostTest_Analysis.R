@@ -12,7 +12,7 @@ library(ggpubr)
 #pre_nihRTScore against post nihRTScoo_re
 
 #DCCS:
-      data<-read.csv("data/combine_pre-post_DCCS.csv")
+      data<-read.csv("output/DCCS_PrePostCombinedData.csv")
      
       cor_data_DCCS<-select(data,pre_nihScore, pre_nihAccuracy,pre_nihRTScore ,post_nihScore, post_nihAccuracy, post_nihRTScore)
       names(cor_data_DCCS)<-c("pre_TScore", "pre_Acc", "pre_ReactionT", "post_TScore", "post_Acc", "post_ReactionT")
@@ -20,11 +20,11 @@ library(ggpubr)
       #pre against post scores co relation
       res<-cor(cor_data_DCCS[,1:3],cor_data_DCCS[,4:6])
       res
-      write.csv(res,"output/Corelation_DCCS.csv", row.names = T)
+      write.csv(res,"output/CorelationValues_DCCS.csv", row.names = T)
 
       #multiple scatter plots visualization
       DCCS_scatterplot<- ggpairs(cor_data_DCCS,title="DCCS Pre and Post Test Scores", aes(fill = "pink"))
-      ggsave("output/DCCS_prepost_scatterplot.png",DCCS_scatterplot)
+      ggsave("images/DCCS_prepost_scatterplot.png",DCCS_scatterplot)
 
 #FLANKER
       data2<-read.csv("output/combine_pre-post_FLANKER.csv")
@@ -65,7 +65,7 @@ library(ggpubr)
      g<-ggarrange(p1, q1, r1 , 
                 labels = c("Improvers Diff in Score", "Diff in Accuracy", "Diff in ReactionTime"),
                 ncol = 3, nrow = 1)
-      ggsave( "output/ImproversPlotsDCCS.png",g)
+      ggsave( "images/ImproversPlotsDCCS.png",g)
 
       DCCS_TotalScore<-DCCS%>%select(userID, pre_nihScore, post_nihScore, DiffScore)%>% gather(PrePost, Score, pre_nihScore, post_nihScore) 
       DCCS_AccuracyScore<-DCCS%>%select(userID, pre_nihAccuracy, post_nihAccuracy, DiffAccuracy)%>%gather(PrePost, Score, pre_nihAccuracy, post_nihAccuracy) 
@@ -83,7 +83,7 @@ library(ggpubr)
                 labels = c("Score", "Accuracy", "ReactionTime"),
                 ncol = 2, nrow = 2)
        
-      ggsave("output/PrePostPlots.png", t2)
+      ggsave("images/PrePostPlots.png", t2)
       
       #see how many get a score mre than 4 on DCCS
       DCCS$ImproverScore<-ifelse(DCCS$DiffScore>0, T, F)
@@ -93,6 +93,6 @@ library(ggpubr)
       DCCS$postScore<-ifelse(DCCS$post_nihScore>4, T, F)
       
       FinalLabels<-select(DCCS, userID, ImproverScore, ImproverAccuracy,ImproverRT, AllImprove, postScore)
-      write.csv(FinalLabels, "output/UserLabels.csv", row.names = F)
+      write.csv(FinalLabels, "data/UserLabels.csv", row.names = F)
       sum(FinalLabels$postScore==T)
       
