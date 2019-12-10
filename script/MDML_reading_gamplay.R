@@ -295,7 +295,7 @@ sessionCountDF <- ayce_40034_3005 %>%
   #table(ayce_40034_3005$Complexity, ayce_40034_3005$Difficulty)
   
   
-write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv")  
+write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)  
 #######  
   #Variables per user
   fastestHits_user <- ayce_40034_3005 %>%
@@ -504,7 +504,7 @@ afterWrongs <- ayce_40034_3005 %>%
   #str(aggregateUsers)
   aggregate$DPrime_user <- (qnorm(aggregate$HitRate_user) - qnorm(aggregate$FARate_user))  
     
-write.csv(aggregate, "data/aggregate_user.csv")  
+write.csv(aggregate, "data/aggregate_user.csv", row.names = F)  
 #########  
 #Variables per user per session
   #Fastest hits per user per session
@@ -613,7 +613,7 @@ write.csv(aggregate, "data/aggregate_user.csv")
                                                          "WRONG_sess", "Wrong_AvgRT_sess", "Wrong_SDRT_sess", "highestLevelPct_sess", 
                                                          "percentCorrect_sess", "HitRate_sess", "FARate_sess", "DPrime_sess"))
   
-  write.csv(aggregateSessWide, "data/aggregate_session.csv")  
+  write.csv(aggregateSessWide, "data/aggregate_session.csv", row.names = F)  
   #########  
   #Variables per user per complexity (translated to Difficulty as easy, medium, hard)
   #table(ayce_40034_3005$Complexity)
@@ -724,7 +724,7 @@ write.csv(aggregate, "data/aggregate_user.csv")
                                                            "highestLevelPct_diff", "percentCorrect_diff", "HitRate_diff", "FARate_diff",
                                                            "DPrime_diff"))
  
-write.csv(aggregateDiffWide, "data/aggregate_difficulty.csv")  
+write.csv(aggregateDiffWide, "data/aggregate_difficulty.csv", row.names = F)  
 #Aggregate everything at the user level  
 aggregate <- arrange(aggregate, accessCode, userID)
 aggregateDiffWide <- arrange(aggregateDiffWide, accessCode, userID)
@@ -740,4 +740,4 @@ gameplay_aggregated <- bind_cols(gameplay_aggregated, aggregateSessWide[,3:122])
 #  gameplay_aggregated <- reduce(aggregatedList, full_join, by = c("accessCode", "userID"))
   
 #Export
-  write.csv(gameplay_aggregated, "data/AYCET_gameplay_aggregated.csv")
+  write.csv(gameplay_aggregated, "data/AYCET_gameplay_aggregated.csv", row.names = F)
