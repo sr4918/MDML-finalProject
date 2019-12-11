@@ -14,7 +14,7 @@ require(compareDF)
 require(sqldf)
 
 #setwd("corinnebrenner")
-#getwd()
+getwd()
 ####
 
 #length(unique(ayce_40034_3005Edit$userID))
@@ -31,16 +31,16 @@ accessCodes <- c("ATHBF18", "ATHF18", "ATM1F18", "ATMBF18")
 
 #gameCode 4003
 filepaths_4003 <- expand.grid(x=accessCodes) %>% 
-#{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
-{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
+{paste0('../../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
+#{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
 
 
 ayce_4003 <- do.call(rbind, lapply(filepaths_4003, read_csv))
 
 #gameCode 4004
 filepaths_4004 <- expand.grid(x=accessCodes) %>% 
-#{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
-{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
+{paste0('../../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
+#{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
 
 
 ayce_4004 <- do.call(rbind, lapply(filepaths_4004, read_csv))
@@ -174,8 +174,8 @@ ayce_40034 <- merge(ayce_4003, ayce_4004[,c("accessCode", "userID", "sesID", "gs
 
 #gameCode 3005
 filepaths_3005 <- expand.grid(x=accessCodes) %>% 
-#{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3005.csv')}
-{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3005.csv')}
+{paste0('../../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3005.csv')}
+#{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3005.csv')}
 
 
 ayce_3005 <- do.call(rbind, lapply(filepaths_3005, read_csv))
@@ -278,7 +278,7 @@ ayce_40034_3005 <- ayce_40034_3005 %>%
 ayce_40034_3005 <- ayce_40034_3005 %>%
   mutate(gameLevelShort = gsub('-[^-]*$', '', gameLevel),
           date = as.Date(logTimestamp, tz = ""))
-  
+  table(ayce_40034_3005$gameLevelShort)
 #Create a new session count using date information, not just sessionID; sessionID is unique for every time a participant logs in
 sessionCountDF <- ayce_40034_3005 %>%
   arrange(userID, date, sesID, logTimestamp, gsUserID, gameLevelShort, gameLevel, alienID) %>%
