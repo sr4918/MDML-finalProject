@@ -23,7 +23,7 @@ library(ggpubr)
       write.csv(res,"output/CorelationValues_DCCS.csv", row.names = T)
 
       #multiple scatter plots visualization
-      DCCS_scatterplot<- ggpairs(cor_data_DCCS,title="DCCS Pre and Post Test Scores", aes(fill = "pink"))
+      DCCS_scatterplot<- ggpairs(cor_data_DCCS,title="Correlation Plot: Pre and Post Test Scores", aes(fill = "pink"))
       ggsave("images/DCCS_prepost_scatterplot.png",DCCS_scatterplot)
 
 #FLANKER

@@ -41,7 +41,7 @@ badUsers <- c(115,
             names(df_posttest_DCCS)<-c("id","userID", "accessCode", "task","post_nihScore", "post_nihAccuracy", "post_nihRTScore", "dateTime")
             
             #remove duplicate attempts of post test with just the first one
-            df_posttest_DCCS<-df_posttest_DCCS%>%group_by(userID)%>%arrange(dateTime)%>%slice(1)
+          df_posttest_DCCS<-df_posttest_DCCS%>%group_by(userID)%>%arrange(dateTime)%>%slice(1)
             write.csv(df_posttest_DCCS,"output/posttestDCCS.csv", row.names = F)
             
           #data check
@@ -78,6 +78,7 @@ badUsers <- c(115,
             }
             total2==nrow(df_posttest_FLANKER)
 #--------------------            
+            #spFA18UCPOST
 #2a. Collecting Pretest Data  for DCCS
       folders2<- list.files(common_path2, pattern = "*_20181221", full.names=TRUE)
       folders2<-file.path(folders2)
