@@ -8,12 +8,16 @@ require(dplyr)
 
 #For Lasso regression 
 #Read in AYCET gameplay data and DCCS data
-AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") 
+AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") %>%mutate(userID = factor(userID))
 ALL_DCCS_data <- read_csv("data/ALL_DCCS_data.csv") %>%
   mutate(userID = factor(userID))
+missing_users<-c("16902", "16806", "16939" ,"16989" ,"17047", "17050","17577")
+
 
 #Merge by userID so each row represents one participant
 AYCET_DCCS <- left_join(AYCET_gameplay_aggregated, ALL_DCCS_data, by = c("userID"))
+
+AYCET_DCCS<-AYCET_DCCS%>%filter(!userID %in% missing_users)
 
 #check that each row is a unique participant
 count <- AYCET_DCCS %>%
@@ -329,7 +333,11 @@ AYCET_DCCS <- AYCET_DCCS %>%
 
 #colnames(AYCET_DCCS)
 
-
+NAs_per_col <- colSums(is.na(AYCET_DCCS))
+# need to replace all NA's with 0 (absent users)
+AYCET_DCCS<-AYCET_DCCS%>%select(-dateTime.x, -dateTime.y)
+AYCET_DCCS<-AYCET_DCCS%>% 
+  replace_na(set_names(as.list(rep(0, length(.))), names(.)))
 
 #Define & Add outcomes for DCCS
   #Already calculated - improvement (based on change in DCCS NIH Score), DCCS$ImproverScore
@@ -347,6 +355,40 @@ AYCET_DCCS <- AYCET_DCCS %>%
 #do we impute mean, 0 or complete cases
 #RT impute mean
 #split to test train
+
+LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS%>%select(-ImproverScore))
+LassoNIHScore_y <-AYCET_DCCS$ImproverScore
+
+#TRAIN DATA SET
+train = AYCET_DCCS %>%
+  sample_frac(0.6)
+
+#TEST DATA SET
+test = AYCET_DCCS %>%
+  setdiff(train)
+
+#TRAIN x and y    
+x_train = model.matrix(~., train%>%select(-ImproverScore))
+y_train = train$ImproverScore
+
+#TEST x and y 
+x_test = model.matrix(~., test%>%select(-ImproverScore))
+y_test <- test$ImproverScore
+
+grid = 10^seq(10, -2, length = 100)
+cv.out = cv.glmnet(x_train, y_train, alpha = 1, family = 'binomial') # Fit lasso model on training data
+plot(cv.out) # Draw plot of training MSE as a function of lambda
+bestlam = cv.out$lambda.min # Select lamda that minimizes training binomial deviance
+lasso_pred = predict(model_lasso, s = bestlam, newx = x_test, type = 'response') # Use best lambda to predict test data
+pred_lasso <- prediction(lasso_pred, y_test)
+perf.lasso <- performance(pred_lasso,'auc')
+cat(perf.lasso@y.values[[1]])
+
+out = glmnet(LassoNIHScore_x, LassoNIHScore_y, alpha = 1, lambda = grid) # Fit lasso model on full dataset
+lasso_coef = predict(out, type = "coefficients", s = bestlam) # Display coefficients using lambda chosen by CV
+lasso_coef
+
+
 
 data <- rbind(training_set, testing_set[,1:12])
 
