@@ -310,11 +310,11 @@ AYCET_DCCS <- AYCET_DCCS %>%
 
 
 ###########################
-#LASSO: 'Improver' Based on change in NIH Score
+#LASSO: 'Improver' Based on change in NIH Score; outcome of interest is ImproverScore
 
 #split to test train
 
-LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore))
+LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
 LassoNIHScore_y <-AYCET_DCCS$ImproverScore
 
 #TRAIN DATA SET
@@ -337,7 +337,7 @@ grid = 10^seq(10, -2, length = 100)
 cv.out = cv.glmnet(x_train, y_train, alpha = 1, family = 'binomial') # Fit lasso model on training data
 plot(cv.out) # Draw plot of training MSE as a function of lambda
 bestlam = cv.out$lambda.min # Select lamda that minimizes training binomial deviance
-lasso_pred = predict(model_lasso, s = bestlam, newx = x_test, type = 'response') # Use best lambda to predict test data
+lasso_pred = predict(cv.out, s = bestlam, newx = x_test, type = 'response') # Use best lambda to predict test data
 pred_lasso <- prediction(lasso_pred, y_test)
 perf.lasso <- performance(pred_lasso,'auc')
 cat(perf.lasso@y.values[[1]])
