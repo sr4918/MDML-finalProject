@@ -7,22 +7,21 @@ require(dplyr)
 
 
 #For Lasso regression 
-<<<<<<< HEAD
-#Read in AYCET gameplay data and DCCS data
-AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") %>%mutate(userID = factor(userID))
-=======
 #Read in AYCET gameplay data and DCCS data; change userID to factor for merge
-AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") 
->>>>>>> 13f962b895a5667bb11b25149223ea0b006d7e64
+AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") %>% 
+  mutate(userID = factor(userID))
+
 ALL_DCCS_data <- read_csv("data/ALL_DCCS_data.csv") %>%
   mutate(userID = factor(userID))
-missing_users<-c("16902", "16806", "16939" ,"16989" ,"17047", "17050","17577")
-
 
 #Merge by userID so each row represents one participant
 AYCET_DCCS <- left_join(AYCET_gameplay_aggregated, ALL_DCCS_data, by = c("userID"))
 
-AYCET_DCCS<-AYCET_DCCS%>%filter(!userID %in% missing_users)
+#Remove users with missing DCCS data
+missing_users<-c("16902", "16806", "16939" ,"16989" ,"17047", "17050","17577")
+
+AYCET_DCCS <- AYCET_DCCS %>%
+  filter(!userID %in% missing_users)
 
 #check that each row is a unique participant
 count <- AYCET_DCCS %>%
@@ -32,8 +31,11 @@ count <- AYCET_DCCS %>%
 
 #remove variables with many NAs; change variable types; convert ordered factors to numbers to impute missing data
 AYCET_DCCS <- AYCET_DCCS %>%
+  #Drop columns that are not data for model or missing too much data
   select(-c(grep("_sess_6",colnames(AYCET_DCCS)))) %>%
-  select(-c("accessCode", "userID")) %>%
+  select(-c(grep("_sess_5",colnames(AYCET_DCCS)))) %>%
+  select(-c("accessCode", "userID", "dateTime.x", "dateTime.y")) %>%
+  #Recode factor levels
   mutate(highestLevel_user = case_when( highestLevel_user == "SpaceCakesLevel 0-0" ~ 1, 
                                         highestLevel_user == "SpaceCakesLevel 0-1" ~ 2, 
                                         highestLevel_user == "SpaceCakesLevel 0-2" ~ 3,
@@ -331,21 +333,12 @@ AYCET_DCCS <- AYCET_DCCS %>%
                                           highestLevel_sess_5 == "SpaceCakesLevel 6-0" ~ 31, 
                                           highestLevel_sess_5 == "SpaceCakesLevel 6-1" ~ 32,  
                                           highestLevel_sess_5 == "SpaceCakesLevel 6-2" ~ 33),
+         #Recode T/F as 1/0 for modeling
         ImproverScore = case_when(ImproverScore == TRUE ~ 1, 
                                   ImproverScore == FALSE ~ 0)) %>%
-  select(-c("ImproverAccuracy", "ImproverRT", "AllImprove", "ImprovedPostScoreGT7"))
+  #replace NAs with 0
+        replace_na(set_names(as.list(rep(0, length(.))), names(.)))
 
-
-#colnames(AYCET_DCCS)
-
-<<<<<<< HEAD
-NAs_per_col <- colSums(is.na(AYCET_DCCS))
-# need to replace all NA's with 0 (absent users)
-AYCET_DCCS<-AYCET_DCCS%>%select(-dateTime.x, -dateTime.y)
-AYCET_DCCS<-AYCET_DCCS%>% 
-  replace_na(set_names(as.list(rep(0, length(.))), names(.)))
-=======
->>>>>>> 13f962b895a5667bb11b25149223ea0b006d7e64
 
 #Define & Add outcomes for DCCS
   #Already calculated - improvement (based on change in DCCS NIH Score), DCCS$ImproverScore
@@ -357,7 +350,7 @@ AYCET_DCCS<-AYCET_DCCS%>%
 
 ###########################
 #LASSO Template
-#identify columsn that have Na's
+#identify columns that have Na's
 #which session 5 6 can be gotten rid of
 #anything with fewer than 50% of people
 #do we impute mean, 0 or complete cases
