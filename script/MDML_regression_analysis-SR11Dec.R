@@ -547,49 +547,59 @@ AYCET_DCCS1<-AYCET_DCCS1%>%
   replace_na(set_names(as.list(AYCET_DCCScol_means), names(.)))
 
 #if need to replace all NA's with 0 use the following code:
-#AYCET_DCCS1<-AYCET_DCCS1%>% 
- # replace_na(set_names(as.list(rep(0, length(.0)), names(.))))
-
-
-
+AYCET_DCCS1<-AYCET_DCCS1%>% 
+  replace_na(set_names(as.list(rep(0, length(.))), names(.)))
 
 #Lasso 1: Which variables are associated with improvement in NIH Score?
 #ImproverScore
+#FULL DATA SET x and y
+    LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS1%>%select(-ImproverScore))
+    LassoNIHScore_y <-AYCET_DCCS1$ImproverScore
 
-
-
-    LassoNIHScore_x <- model.matrix(ImproverScore ~ ., AYCET_DCCS1)[,-1]
-    LassoNIHScore_y <-AYCET_DCCS1%>%select(ImproverScore)
-
+#TRAIN DATA SET
     train = AYCET_DCCS1 %>%
       sample_frac(0.6)
-    
+
+#TEST DATA SET
     test = AYCET_DCCS1 %>%
       setdiff(train)
-    
-    x_train = model.matrix(ImproverScore~., train)[,-1]
-    x_test = model.matrix(ImproverScore~., test)[,-1]
-    
-    y_train = train %>%
-      select(ImproverScore) 
-    
-    y_test = test %>%
-      select(ImproverScore)
-  
-    model_lasso <- glmnet(x_train, as.matrix(y_train), alpha=1, lambda=.01, family='binomial', intercept=FALSE) #without intercept
-    
-    plot(model_lasso)    # Draw plot of coefficients
 
-# fit lasso and ridge
-#model_lasso <- glmnet(x_train, y_train, alpha=1, lambda=.01, family='binomial')
-model_lasso2 <- glmnet(x_train, y_train, alpha=1, lambda=.01, family='binomial', intercept=FALSE) #without intercept
+#TRAIN x and y    
+    x_train = model.matrix(~., train%>%select(-ImproverScore))
+    y_train = train$ImproverScore
 
-# 2. Generate predictions from both models on testing_set and calculate the AUC (for both models).
-prob_lasso <- predict(model_lasso, x_test,type='response')
-pred_lasso <- prediction(prob_lasso, y_test)
-perf.lasso <- performance(pred_lasso,'auc')
-cat(perf.lasso@y.values[[1]])
+#TEST x and y 
+    x_test = model.matrix(~., test%>%select(-ImproverScore))
+    y_test <- test$ImproverScore
 
+#FROM RAVI
+   # hyperparamter.lambda <- .01
+    #fitted.lasso <- glmnet::glmnet(x_train, y_train,
+     #                              alpha=1, lambda=hyperparamter.lambda,
+      #                             family='binomial')
+   # model_lasso <- glmnet(x_train, y_train, alpha=1, lambda=grid, family='binomial') #without intercept
+    
+    #fitted.lasso <- glmnet::glmnet(training.X, training.Y,
+#                                   alpha=1, lambda=hyperparamter.lambda,
+ #                                  family='binomial')
+    
+
+    #GENERAL CASE
+    grid = 10^seq(10, -2, length = 100)
+    cv.out = cv.glmnet(x_train, y_train, alpha = 1, family = 'binomial') # Fit lasso model on training data
+    plot(cv.out) # Draw plot of training MSE as a function of lambda
+    bestlam = cv.out$lambda.min # Select lamda that minimizes training binomial deviance
+    lasso_pred = predict(model_lasso, s = bestlam, newx = x_test, type = 'response') # Use best lambda to predict test data
+    pred_lasso <- prediction(lasso_pred, y_test)
+    perf.lasso <- performance(pred_lasso,'auc')
+    cat(perf.lasso@y.values[[1]])
+    
+    out = glmnet(LassoNIHScore_x, LassoNIHScore_y, alpha = 1, lambda = grid) # Fit lasso model on full dataset
+    lasso_coef = predict(out, type = "coefficients", s = bestlam) # Display coefficients using lambda chosen by CV
+    lasso_coef
+    lasso_coef[lasso_coef!=0]
+
+    
 #Lasso 2: Which variables are associated with high accuracy at the end?
 
 #Lasso 3: Which variables are associated with low reaction times at the end (fast, correct responses)?
