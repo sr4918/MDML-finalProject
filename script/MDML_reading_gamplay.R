@@ -473,7 +473,6 @@ write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)
       
   
 #Accuracy for beginning, middle, end of session
-      #Get average complexity for each section just for reference as well? 
 ayce_40034_3005 <- ayce_40034_3005 %>%
   group_by(userID, sesCount) %>%
     arrange(logTimestamp) %>%
@@ -497,12 +496,20 @@ Accuracy_vs_timeChunk <- left_join(third_count_DF, accuracy_thirds, by = c("user
 
     ######Graph how users do at the beginning, middle, and end of sessions; can account for average complexity
     #facet by sesCount
-    Accuracy_vs_timeChunk_plot <- ggplot( data = Accuracy_vs_timeChunk, aes(x = factor(session_thirds), y = third_accuracy, group = userID, color = avgComplexity)) +
+    #Accuracy_vs_timeChunk_plot <- ggplot( data = Accuracy_vs_timeChunk, aes(x = factor(session_thirds), y = third_accuracy, group = userID, color = avgComplexity)) +
+    #  geom_line() + 
+    #  geom_point() + 
+    #  facet_grid(~ sesCount)
+
+    #show improvement over time, facet by time on x, complexity on y, color by accuracy or performance
+    Accuracy_vs_timeChunk_plot2 <- ggplot( data = Accuracy_vs_timeChunk, aes(x = factor(session_thirds), y = avgComplexity, group = userID, color = third_accuracy)) +
       geom_line() + 
       geom_point() + 
-      facet_grid(~ sesCount)
-    ###### Come back to this -- how to show improvement over time, facet by time on x, complexity on y, color by accuracy or performance
-
+      facet_grid(~ sesCount) + 
+      scale_color_gradient2(low = "#1e201e", mid = "#c1c6c2", high = "#37a146", midpoint = .5, name = "Accuracy Rate") + 
+      labs(x = "Beginning, Middle, and End of Sessions", y = "Average Complexity", title = "Complexity Over Time")
+    ggsave("Desktop/MDML/MDML-finalProject/MDML-finalProject/images/Accuracy_vs_timeChunk_plot2.png", Accuracy_vs_timeChunk_plot2)
+    ###### 
 
 #Accuracy & avg RT after Wrongs
 afterWrongs <- ayce_40034_3005 %>%
