@@ -552,7 +552,7 @@ afterWrongs <- ayce_40034_3005 %>%
 #write.csv(aggregate, "data/aggregate_user.csv", row.names = F)  
   write.csv(aggregate, "Desktop/MDML/MDML-finalProject/MDML-finalProject/data/aggregate_user.csv", row.names = F)  
 
-#########  
+#########  SESSION
 #Variables per user per session
   #Fastest hits per user per session
   fastestHits_sess <- ayce_40034_3005 %>%
@@ -663,8 +663,8 @@ afterWrongs <- ayce_40034_3005 %>%
   write.csv(aggregateSessWide, "Desktop/MDML/MDML-finalProject/MDML-finalProject/data/aggregate_session.csv", row.names = F)  
   
   #write.csv(aggregateSessWide, "data/aggregate_session.csv", row.names = F)  
-  #########  
-  #Variables per user per complexity (translated to Difficulty as easy, medium, hard)
+  #########  DIFFICULTY
+  #Variables per user per complexity (translated to Difficulty as easy, medium, hard just to simplify)
   #table(ayce_40034_3005$Complexity)
 
   
@@ -774,7 +774,7 @@ afterWrongs <- ayce_40034_3005 %>%
                                                            "DPrime_diff"))
   
 write.csv(aggregateDiffWide, "Desktop/MDML/MDML-finalProject/MDML-finalProject/data/aggregate_difficulty.csv", row.names = F)  
-#Aggregate everything at the user level  
+#Aggregate everything at the user level and bind columns from the user level, session level, and difficulty
 aggregate <- arrange(aggregate, accessCode, userID)
 aggregateDiffWide <- arrange(aggregateDiffWide, accessCode, userID)
 aggregateSessWide <- arrange(aggregateSessWide, accessCode, userID)
@@ -784,7 +784,7 @@ gameplay_aggregated <- bind_cols(aggregate, aggregateDiffWide[,3:62])
 gameplay_aggregated <- bind_cols(gameplay_aggregated, aggregateSessWide[,3:122])
 
 
-#All NA:
+#All NA, so remove this variable:
 gameplay_aggregated <- gameplay_aggregated %>%
   select(-c("avgRT_afterWrong_NA"))
   
