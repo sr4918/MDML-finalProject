@@ -313,7 +313,7 @@ AYCET_DCCS <- AYCET_DCCS %>%
 #LASSO: 'Improver' Based on change in NIH Score; outcome of interest is ImproverScore
 
 #split to test train
-
+#Remove all outcomes
 LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
 LassoNIHScore_y <-AYCET_DCCS$ImproverScore
 
@@ -345,6 +345,16 @@ cat(perf.lasso@y.values[[1]])
 out = glmnet(LassoNIHScore_x, LassoNIHScore_y, alpha = 1, lambda = grid) # Fit lasso model on full dataset
 lasso_coef = predict(out, type = "coefficients", s = bestlam) # Display coefficients using lambda chosen by CV
 lasso_coef
+str(lasso_coef)
+###Bar graph of coefficients
+lasso_coef_df <- as.data.frame(summary(lasso_coef))
+lasso_coef_feature_names <- as.data.frame(cbind(seq(1:length(lasso_coef@Dimnames[[1]])), lasso_coef@Dimnames[[1]]))
+colnames(lasso_coef_feature_names) <- c("Variable", "i")
+
+lasso_coef_df <- as.data.frame(lasso_coef@Dimnames[[1]], lasso_coef@x)
+
+
+
 
 
 #######################################
