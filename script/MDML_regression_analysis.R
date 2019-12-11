@@ -322,8 +322,7 @@ AYCET_DCCS <- AYCET_DCCS %>%
                                           highestLevel_sess_5 == "SpaceCakesLevel 6-0" ~ 31, 
                                           highestLevel_sess_5 == "SpaceCakesLevel 6-1" ~ 32,  
                                           highestLevel_sess_5 == "SpaceCakesLevel 6-2" ~ 33),
-                              ) %>%
- mutate(ImproverScore = case_when(ImproverScore == TRUE ~ 1, 
+        ImproverScore = case_when(ImproverScore == TRUE ~ 1, 
                                   ImproverScore == FALSE ~ 0)) %>%
   select(-c("ImproverAccuracy", "ImproverRT", "AllImprove", "ImprovedPostScoreGT7"))
 
