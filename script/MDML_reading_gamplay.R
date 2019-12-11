@@ -321,11 +321,11 @@ write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)
   #Highest level of the game reached per user
   highestLevels_user <- ayce_40034_3005 %>%
     group_by(userID) %>%
-    summarize(highestLevel_user = max(gameLevel, na.rm = TRUE))
+    summarize(highestLevel_user = max(gameLevelShort, na.rm = TRUE))
   
   #Filter rows to get counts of trials within the highest level (per user)
   highestLevelCounts_user <- left_join(ayce_40034_3005, highestLevels_user, by = c("userID") ) %>%
-    filter (gameLevel == highestLevel_user) %>%
+    filter (gameLevelShort == highestLevel_user) %>%
     group_by(userID) %>%
     summarize(highestLevelTrialCount_user = n()) 
   
@@ -563,11 +563,11 @@ afterWrongs <- ayce_40034_3005 %>%
   #Highest level per user per session
   highestLevels_sess <- ayce_40034_3005 %>%
     group_by(userID, sesCount) %>%
-    summarize(highestLevel_sess = max(gameLevel, na.rm = TRUE))
+    summarize(highestLevel_sess = max(gameLevelShort, na.rm = TRUE))
   
   #Filter rows to get counts of trials within the highest level (per user per session)
   highestLevelCount_sess <- left_join(ayce_40034_3005, highestLevels_sess, by = c("userID", "sesCount") ) %>%
-    filter (gameLevel == highestLevel_sess) %>%
+    filter (gameLevelShort == highestLevel_sess) %>%
     group_by(userID, sesCount) %>%
     summarize(highestTrialCount_sess = n()) 
   
@@ -677,11 +677,11 @@ afterWrongs <- ayce_40034_3005 %>%
   #Highest level per user per difficulty
   highestLevels_diff <- ayce_40034_3005 %>%
     group_by(userID, Difficulty) %>%
-    summarize(highestLevel_diff = max(gameLevel, na.rm = TRUE))
+    summarize(highestLevel_diff = max(gameLevelShort, na.rm = TRUE))
   
   #Filter rows to get counts of trials within the highest level (per user per difficulty)
   highestLevelCounts_diff <- left_join(ayce_40034_3005, highestLevels_diff, by = c("userID", "Difficulty") ) %>%
-    filter (gameLevel == highestLevel_diff) %>%
+    filter (gameLevelShort == highestLevel_diff) %>%
     group_by(userID, Difficulty) %>%
     summarize(highestLevelTrialCount_diff = n()) 
   
