@@ -3,6 +3,7 @@ library(readr)
 require(ROCR)
 require(ranger)
 require(glmnet)
+require(dplyr)
 
 
 #For Lasso regression 
@@ -11,7 +12,7 @@ require(glmnet)
 AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") 
 #Find & get rid of '2' column
 AYCET_gameplay_aggregated <- AYCET_gameplay_aggregated %>%
-    #select(-c("2", "X1"))
+     #select(-c("2", "X1"))
     #select(-c("X1"))
     #select(-c("avgRT_afterWrong_NA"))
     
@@ -23,7 +24,8 @@ ALL_DCCS_data <- read_csv("data/ALL_DCCS_data.csv")
 AYCET_DCCS <- left_join(AYCET_gameplay_aggregated, ALL_DCCS_data, by = c("userID"))
 
 AYCET_DCCS <- AYCET_DCCS %>%
-  #select(-c("avgRT_afterWrong_NA")) %>%
+  select(-c("avgRT_afterWrong_NA")) %>%
+  select(-c(grep("_sess_6",colnames(AYCET_DCCS))))%>%
   select(-c("accessCode", "userID")) %>%
   select(-c("highestLevel_user" ,
             "highestLevel_diff_Easy" ,
@@ -37,7 +39,7 @@ AYCET_DCCS <- AYCET_DCCS %>%
             "highestLevel_sess_6")) %>%
  mutate(ImproverScore = case_when(ImproverScore == TRUE ~ 1, 
                                   ImproverScore == FALSE ~ 0)) %>%
-  select(-c("ImproverAccuracy", "ImproverRT", "AllImprove", "postScore"))
+  select(-c("ImproverAccuracy", "ImproverRT", "AllImprove", "ImprovedPostScoreGT7"))
 
 #Change characters to ordered factors
 AYCET_DCCS <- AYCET_DCCS %>%
@@ -71,6 +73,13 @@ count <- AYCET_DCCS %>%
 
 ###########################
 #LASSO Template
+#identify columsn that have Na's
+#which session 5 6 can be gotten rid of
+#anything with fewer than 50% of people
+#do we impute mean, 0 or complete cases
+#RT impute mean
+#split to test train
+
 data <- rbind(training_set, testing_set[,1:12])
 
 x <- model.matrix(outcome ~ inspection_date + borough + cuisine + inspection_year + month +
@@ -99,6 +108,13 @@ cat(perf.lasso@y.values[[1]])
 #Need to remove variables with many NAs
 #Lasso 1: Which variables are associated with improvement in NIH Score?
 
+NAs_per_col <- data.frame(matrix(ncol = 2, nrow = 0))
+NAs_per_col<- colSums(is.na(AYCET_DCCS))
+#all _see_6 columns have a large number of NA's >140 dropping these
+grep("_sess_6",colnames(AYCET_DCCS))
+
+names(NAs_per_col)<-c("totalNA")
+NAs_per_col<-NAs_per_col%>%arrange(-totalNA)
 LassoNIHScore <- model.matrix(ImproverScore ~ ., AYCET_DCCS)[,-1]
 
 
