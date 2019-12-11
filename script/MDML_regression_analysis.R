@@ -347,7 +347,8 @@ lasso_coef = predict(out, type = "coefficients", s = bestlam) # Display coeffici
 lasso_coef
 
 
-
+#######################################
+#Is everything below just scratch material?
 data <- rbind(training_set, testing_set[,1:12])
 
 x <- model.matrix(outcome ~ inspection_date + borough + cuisine + inspection_year + month +
