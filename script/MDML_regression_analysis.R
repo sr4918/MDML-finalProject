@@ -7,7 +7,7 @@ require(dplyr)
 
 
 #For Lasso regression 
-#Read in AYCET gameplay data and DCCS data
+#Read in AYCET gameplay data and DCCS data; change userID to factor for merge
 AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") 
 ALL_DCCS_data <- read_csv("data/ALL_DCCS_data.csv") %>%
   mutate(userID = factor(userID))
@@ -20,7 +20,7 @@ count <- AYCET_DCCS %>%
   group_by(userID) %>%
   summarize(n = n()) %>%
   filter(n > 1)
-table(AYCET_DCCS$highestLevel_user)
+
 #remove variables with many NAs; change variable types; convert ordered factors to numbers to impute missing data
 AYCET_DCCS <- AYCET_DCCS %>%
   select(-c(grep("_sess_6",colnames(AYCET_DCCS)))) %>%
