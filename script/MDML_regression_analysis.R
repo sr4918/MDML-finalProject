@@ -330,7 +330,6 @@ AYCET_DCCS <- AYCET_DCCS %>%
 #colnames(AYCET_DCCS)
 
 
-
 #Define & Add outcomes for DCCS
   #Already calculated - improvement (based on change in DCCS NIH Score), DCCS$ImproverScore
   #New: Above the median, Accuracy of 5 vs below five
