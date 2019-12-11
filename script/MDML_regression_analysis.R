@@ -373,7 +373,7 @@ cat(perf.lasso@y.values[[1]])
 ###########################
   
 #Need to remove variables with many NAs, 
-#or replace NAs with 0 for all of the AYCET data. Are a few people just missing from the DCCS data completely?
+#or replace NAs with 0 for all of the AYCET data.
 
 NAs_per_col <- data.frame(matrix(ncol = 2, nrow = 0))
 NAs_per_col <- colSums(is.na(AYCET_DCCS))
@@ -384,9 +384,9 @@ names(NAs_per_col)<-c("totalNA")
 NAs_per_col<-NAs_per_col%>%arrange(-totalNA)
 LassoNIHScore <- model.matrix(ImproverScore ~ ., AYCET_DCCS)[,-1]
 
-#Lasso 1: Which variables are associated with improvement in NIH Score?
+#Lasso 1: Which game play features are associated with improvement in DCCS NIH Score?
 ImproverScore
 
-#Lasso 2: Which variables are associated with high accuracy at the end?
+#Lasso 2: Which game play features are associated with high accuracy in the DCCS Accuracy outcome?
 
-#Lasso 3: Which variables are associated with low reaction times at the end (fast, correct responses)?
+#Lasso 3: Which game play features are associated with low reaction times in DCCS (high scores = fast, correct responses)?
