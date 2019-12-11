@@ -1,11 +1,13 @@
-#MDML Final Project 2019
-##Associating Features of Game Play with Improved Executive Function Using Lasso Regression
-###Corinne Brenner & Sameen Reza
+# MDML Final Project 2019
+## Associating Features of Game Play with Improved Executive Function Using Lasso Regression
+### Corinne Brenner & Sameen Reza
 
-##Getting Started
+## Getting Started
 This repository contains the code used to import and clean a complex dataset, aggregated data which we are able to share, the code to analyse aggregated data, and code to visualize elements of the data and analysis. 
 
-##Data sources
+A video to help you understand the game is available [here](https://vimeo.com/366276953).
+
+## Data sources
 This repository does not contain the raw data, but you can review the data assembly, preprocessing, and many cleaning steps in the 'script' folder. 
 There are 2 sources of messy data: 
  * A set of game log files for a digital game that is used to train executive function ("All You Can E.T., abbreviated AYCET; ), and 
@@ -17,7 +19,7 @@ Additional data sources were used to create the features and clean the data. The
 * testAccounts.csv: A list of known 'bad' users, like test accounts, or accounts which exist due to participant error. 
 * FA2018_Intervention_Complexity.csv: A table of the levels of the game and the complexity of each level, on a scale from 1 (easiest) to 7 (most difficult). 
 
-##Preprocessing
+## Preprocessing
 The 'script' folder contains code for the data assembly, preprocessing, and many cleaning steps for the AYCET and DCCS data.
 
 The file "MDML_reading_gameplay.R" contains the steps used to import, restructure, and clean the data from the AYCET game logs. Once the raw data was important and restructured, the AYCET gameplay data was manipulated to create a variety of features for modeling. Since this process required many steps, we exported aggregated data in the 'output' folder. 
@@ -33,9 +35,9 @@ ALL_DCCS_data.csv contains the preprocessed DCCS data.
 Images which helped us understand the distributions, correlations, or other comparisons of these aggregated data were exported to the 'images' folder.
 
 
-##Images
+## Images
 
-##Lasso Regression Analyses
+## Lasso Regression Analyses
 
 
 
