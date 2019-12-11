@@ -1,5 +1,7 @@
 #MDML
 #Reading in & combining AYCET gameplay files
+
+#Load packages
 require(tidyverse)
 require(purrr)
 library(doParallel)
@@ -11,24 +13,23 @@ require(compareDF)
 #install.packages("sqldf")
 require(sqldf)
 
-setwd("corinnebrenner")
-getwd()
+#setwd("corinnebrenner")
+#getwd()
 ####
 
 #length(unique(ayce_40034_3005Edit$userID))
-#147 AYCET users, but I see at least 1 known 'bad' user
+#147 AYCET users, but I see at least 1 known 'bad' user; these are test accounts or student errors that need to be removed
 
 #userIDs to remove 
 badUsers <- read_csv("data/testAccounts.csv")
 badUsers <- c(badUsers$userID)
 
-#List of access codes with AYCET data in them, to generate file paths + names
+#List of access codes with AYCET data in their associated folders, needed to generate file paths + names
 accessCodes <- c("ATHBF18", "ATHF18", "ATM1F18", "ATMBF18")
-#gameCodes <- c(3009, 4003, 4004)
 
-#Read in the files and append the same gameCodes to each other
+#Read in the files and append the gameCodes from different access codes to each other
 
-#4003
+#gameCode 4003
 filepaths_4003 <- expand.grid(x=accessCodes) %>% 
 #{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
 {paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
@@ -36,7 +37,7 @@ filepaths_4003 <- expand.grid(x=accessCodes) %>%
 
 ayce_4003 <- do.call(rbind, lapply(filepaths_4003, read_csv))
 
-#4004
+#gameCode 4004
 filepaths_4004 <- expand.grid(x=accessCodes) %>% 
 #{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
 {paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
@@ -44,7 +45,7 @@ filepaths_4004 <- expand.grid(x=accessCodes) %>%
 
 ayce_4004 <- do.call(rbind, lapply(filepaths_4004, read_csv))
 
-#Change variable types and clean known issues with duplicate jots in 4003 and 4004 files
+#Change variable types and clean known issues with duplicate jots in gameCode 4003 and 4004 files
 ayce_4003 <- ayce_4003 %>%
   mutate(jotID2 = as.integer(jotID + 1),
          accessCode = factor(accessCode),
@@ -161,8 +162,9 @@ ayce_4004 <- ayce_4004 %>%
   ungroup()
 
 
-#Merge 4003 and 4004 files
-
+#Merge the files from gameCode 4003 and 4004
+#gameCode 4003 is written to the database immediately before gameCode 4004, so by adding 1 to its jotID as jotID2, it's 
+#useful for this merge 
 ayce_40034 <- merge(ayce_4003, ayce_4004[,c("accessCode", "userID", "sesID", "gsUserID", "gameKey", "gameLevel","alienID", "reactionTime", "eyeReactionTime", "afterHighlightedReactionTime", "jotID")], 
                     by.x = c("accessCode", "userID", "sesID", "gsUserID", "gameKey","gameLevel", "alienID", "jotID2"),
                     by.y = c("accessCode", "userID", "sesID", "gsUserID", "gameKey","gameLevel", "alienID", "jotID")) %>%
@@ -170,7 +172,7 @@ ayce_40034 <- merge(ayce_4003, ayce_4004[,c("accessCode", "userID", "sesID", "gs
 
 #Import and Merge 3005 data to get wave types and identify rule changes
 
-#3005
+#gameCode 3005
 filepaths_3005 <- expand.grid(x=accessCodes) %>% 
 #{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3005.csv')}
 {paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3005.csv')}
@@ -183,7 +185,7 @@ ayce_3005 <- do.call(rbind, lapply(filepaths_3005, read_csv))
 #  summarize(n = n()) %>%
 #  filter(n > 1)
   
-#There were duplicates, so remove them 
+#There were duplicates, so remove them and change variable types
 ayce_3005_3 <- ayce_3005 %>%
   group_by(accessCode, userID, sesID, gsUserID, gameKey, gameLevel, jotID) %>%
   arrange(logTimestamp) %>%
@@ -238,7 +240,7 @@ ayce_3005_3 <- ayce_3005 %>%
          waveType = factor(waveType)
   )
 
-#Add a lower bound and upper bound timestamp so you can join 3005 to 40034 based on time
+#Create a lower bound and upper bound timestamp so you can join 3005 to 40034 based on time
 ayce_3005_3$lowerBound <- (ayce_3005_3$logTimestamp - 1)
 ayce_3005_3$upperBound <- lead(ayce_3005_3$logTimestamp)
 
@@ -260,7 +262,7 @@ ayce_40034_3005 <- sqldf::sqldf("SELECT ayce_40034.accessCode, ayce_40034.userID
                          ayce_40034.gameLevel = ayce_3005_3.gameLevel AND
                          ayce_40034.logTimestamp > ayce_3005_3.lowerBound AND ayce_40034.logTimestamp < ayce_3005_3.upperBound") 
 
-#Remove duplicates (only differing based on logged time)
+#Remove duplicates (only differing based on logged time, due to logging errors), and filter out bad users
 ayce_40034_3005 <- ayce_40034_3005 %>%
   select(accessCode, userID, sesID, gsUserID, gameKey, gameLevel, alienID, gameCode, logTimestamp, logID, jotID, gameTime,
          alienTypeAndColor, hitType, speed, reactionTime, eyeReactionTime, afterHighlightedReactionTime, waveType) %>%
@@ -269,14 +271,15 @@ ayce_40034_3005 <- ayce_40034_3005 %>%
   filter(!userID %in% badUsers)
 
 ##############
-#Add needed variables for further analysis
+#Add variables needed for further analysis
 
-#Create a short game level label that excludes the last 
+#Create a short game level label that excludes the last digit; the last digit represents the number of attempts that
+#user has had on the level
 ayce_40034_3005 <- ayce_40034_3005 %>%
   mutate(gameLevelShort = gsub('-[^-]*$', '', gameLevel),
           date = as.Date(logTimestamp, tz = ""))
   
-#Create a new session count using date information, not just sessionID, which creates a new session every time a participant logs in
+#Create a new session count using date information, not just sessionID; sessionID is unique for every time a participant logs in
 sessionCountDF <- ayce_40034_3005 %>%
   arrange(userID, date, sesID, logTimestamp, gsUserID, gameLevelShort, gameLevel, alienID) %>%
   group_by(userID, date, sesID, gsUserID) %>%
@@ -291,9 +294,9 @@ sessionCountDF <- ayce_40034_3005 %>%
   #Join new session count variable in to main dataset
   ayce_40034_3005 <- left_join(ayce_40034_3005, sessionCountDF[, c("userID", "date", "sesID", "gsUserID", "sesCount", "sesCountAll")], by = c("userID", "date", "sesID", "gsUserID"))
   
-  #Import & merge information about the complexity of each game level (as assigned by game designer)
-  complexity <- read_csv("Desktop/MDML/MDML-finalProject/MDML-finalProject/data/FA2018_Intervention_Complexity.csv")
-  #complexity <- read_csv("data/FA2018_Intervention_Complexity.csv")
+#Import & merge information about the complexity of each game level (as assigned by game designer)
+  #complexity <- read_csv("Desktop/MDML/MDML-finalProject/MDML-finalProject/data/FA2018_Intervention_Complexity.csv")
+  complexity <- read_csv("data/FA2018_Intervention_Complexity.csv")
   ayce_40034_3005 <- left_join(ayce_40034_3005, complexity[, c("gameLevelShort", "Complexity")], by = c("gameLevelShort"))
   
   #Relabel complexity levels into fewer 'difficulty' categories to streamline analyses
@@ -307,14 +310,15 @@ sessionCountDF <- ayce_40034_3005 %>%
   
 
 write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)  
-#######  
+#######USER  
   #Variables per user
+  #The fastest reaction time for Hits (correct responses)
   fastestHits_user <- ayce_40034_3005 %>%
     filter(hitType == "HIT") %>%
     group_by(accessCode, userID) %>%
     summarize(fastestRT_user = min(reactionTime, na.rm = TRUE))
   
-  #Highest level per user
+  #Highest level of the game reached per user
   highestLevels_user <- ayce_40034_3005 %>%
     group_by(userID) %>%
     summarize(highestLevel_user = max(gameLevel, na.rm = TRUE))
@@ -335,7 +339,7 @@ write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)
     group_by(userID) %>%
     summarize(nLevels_user = n_distinct(gameLevel)) 
   
-  #Total time played (seconds) per user
+  #Total time played (seconds) per user, and per difficulty level
   totalTimePlayed_user <- ayce_40034_3005 %>%
     group_by(userID, sesID, gsUserID, gameLevel, gameLevelShort) %>%
     summarize(
@@ -356,7 +360,7 @@ write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)
       timePlayed_difficulty = as.character(sum(TimePlayedSubtotal, na.rm = TRUE)) 
     )
   
-  
+  #Count of hits, and the average & standard deviation of the reaction time for hits
   HitCount_user <- ayce_40034_3005 %>% #Hits
     group_by(userID)  %>%
     filter(hitType == "HIT") %>%
@@ -381,13 +385,14 @@ write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)
               Wrong_SDRT_user = sd(reactionTime, na.rm = TRUE)) 
  
  #Accuracy % for first alien after a rule change
+  #Get a count of first aliens after a rule change per user & complexity level
   RuleChange_user <- ayce_40034_3005 %>%
     group_by(userID, gameLevelShort, Complexity) %>%
       arrange(alienID) %>%
       slice(1) %>%
     group_by(userID) %>%
       summarize(first_count = n())
-  
+  #Get a count of correct responses to first aliens after a rule change per user & complexity level
   RuleChange_user_correct <- ayce_40034_3005 %>%
     group_by(userID, gameLevelShort, Complexity) %>%
       arrange(alienID) %>%
@@ -395,7 +400,7 @@ write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)
       filter(hitType == "HIT") %>%
     group_by(userID) %>%
       summarize(first_count_correct = n())
-  
+  #Join & calculate accuracy percentage
   RuleChange_user <- left_join(RuleChange_user, RuleChange_user_correct, by = c("userID")) %>%
     mutate(RuleChange_Accuracy_Pct = round(first_count_correct/first_count, 2))
   
@@ -446,6 +451,7 @@ write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)
     filter(hitType == "HIT") %>%
     summarize(Difficulty_Hits = n())
   
+  #join data in long format for graphing
   Accuracy_Difficulty_user_long <- left_join(Count_Difficulty_user, Accuracy_Difficulty_user_long, by = c("userID", "Difficulty")) %>%
     mutate(Accuracy_Pct_diff = Difficulty_Hits/DifficultyTrialCount) %>%
     filter(!userID %in% badUsers)
@@ -461,7 +467,7 @@ write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)
       
       
       #######
-      #Wide format to join later
+      #Wide format (to join later)
       Accuracy_Difficulty_user <- pivot_wider(data = Accuracy_Difficulty_user_long, names_from = "Difficulty", 
                                         values_from = c("DifficultyTrialCount", "Difficulty_Hits", "Accuracy_Pct_diff"))
       
@@ -771,9 +777,9 @@ gameplay_aggregated <- bind_cols(aggregate, aggregateDiffWide[,3:62])
 gameplay_aggregated <- bind_cols(gameplay_aggregated, aggregateSessWide[,3:122])
 
 
-#too many NAs to work
-#  aggregatedList <- list(aggregate, aggregateSessWide, aggregateDiffWide)
-#  gameplay_aggregated <- reduce(aggregatedList, full_join, by = c("accessCode", "userID"))
+#All NA:
+gameplay_aggregated <- gameplay_aggregated %>%
+  select(-c("avgRT_afterWrong_NA"))
   
 #Export
   write.csv(gameplay_aggregated, "Desktop/MDML/MDML-finalProject/MDML-finalProject/data/AYCET_gameplay_aggregated.csv", row.names = F)
