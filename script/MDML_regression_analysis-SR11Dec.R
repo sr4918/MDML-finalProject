@@ -555,33 +555,37 @@ AYCET_DCCS1<-AYCET_DCCS1%>%
 
 #Lasso 1: Which variables are associated with improvement in NIH Score?
 #ImproverScore
-set.seed(1234)
-index<-sample(1:nrow(AYCET_DCCS1),.6*nrow(AYCET_DCCS1), replace = T)
-train_data <- AYCET_DCCS1[index,]
-test_data <- AYCET_DCCS1[-index,]
-
-LassoNIHScore <- model.matrix(ImproverScore ~ ., AYCET_DCCS1)[,-1]
-set.seed(1234)
-index<-sample(1:nrow(LassoNIHScore),.6*nrow(LassoNIHScore), replace = T)
-train_data <- LassoNIHScore[index,]
-test_data <- LassoNIHScore[-index,]
 
 
 
+    LassoNIHScore_x <- model.matrix(ImproverScore ~ ., AYCET_DCCS1)[,-1]
+    LassoNIHScore_y <-AYCET_DCCS1%>%select(ImproverScore)
 
-x_train <- x[1:nrow(training_set),]
-y_train <- training_set$outcome
-
-x_test <- x[nrow(training_set)+1 :nrow(testing_set),] 
-y_test <- testing_set$outcome
-
+    train = AYCET_DCCS1 %>%
+      sample_frac(0.6)
+    
+    test = AYCET_DCCS1 %>%
+      setdiff(train)
+    
+    x_train = model.matrix(ImproverScore~., train)[,-1]
+    x_test = model.matrix(ImproverScore~., test)[,-1]
+    
+    y_train = train %>%
+      select(ImproverScore) 
+    
+    y_test = test %>%
+      select(ImproverScore)
+  
+    model_lasso <- glmnet(x_train, as.matrix(y_train), alpha=1, lambda=.01, family='binomial', intercept=FALSE) #without intercept
+    
+    plot(model_lasso)    # Draw plot of coefficients
 
 # fit lasso and ridge
 #model_lasso <- glmnet(x_train, y_train, alpha=1, lambda=.01, family='binomial')
 model_lasso2 <- glmnet(x_train, y_train, alpha=1, lambda=.01, family='binomial', intercept=FALSE) #without intercept
 
 # 2. Generate predictions from both models on testing_set and calculate the AUC (for both models).
-prob_lasso <- predict(model_lasso2, x_test,type='response')
+prob_lasso <- predict(model_lasso, x_test,type='response')
 pred_lasso <- prediction(prob_lasso, y_test)
 perf.lasso <- performance(pred_lasso,'auc')
 cat(perf.lasso@y.values[[1]])
