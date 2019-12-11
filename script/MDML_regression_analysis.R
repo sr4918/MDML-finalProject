@@ -436,19 +436,19 @@ perf.lasso <- performance(pred_lasso,'auc')
 cat(perf.lasso@y.values[[1]])
 ###########################
   
-#Need to remove variables with many NAs
-#Lasso 1: Which variables are associated with improvement in NIH Score?
+#Need to remove variables with many NAs, 
+#or replace NAs with 0 for all of the AYCET data. Are a few people just missing from the DCCS data completely?
 
 NAs_per_col <- data.frame(matrix(ncol = 2, nrow = 0))
-NAs_per_col<- colSums(is.na(AYCET_DCCS))
-#all _see_6 columns have a large number of NA's >140 dropping these
+NAs_per_col <- colSums(is.na(AYCET_DCCS))
+#all _see_6 columns have a large number of NA's >140 dropping these; DONE in like 25
 grep("_sess_6",colnames(AYCET_DCCS))
 
 names(NAs_per_col)<-c("totalNA")
 NAs_per_col<-NAs_per_col%>%arrange(-totalNA)
 LassoNIHScore <- model.matrix(ImproverScore ~ ., AYCET_DCCS)[,-1]
 
-
+#Lasso 1: Which variables are associated with improvement in NIH Score?
 ImproverScore
 
 #Lasso 2: Which variables are associated with high accuracy at the end?
