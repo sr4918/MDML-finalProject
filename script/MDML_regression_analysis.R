@@ -7,8 +7,13 @@ require(dplyr)
 
 
 #For Lasso regression 
+<<<<<<< HEAD
 #Read in AYCET gameplay data and DCCS data
 AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") %>%mutate(userID = factor(userID))
+=======
+#Read in AYCET gameplay data and DCCS data; change userID to factor for merge
+AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") 
+>>>>>>> 13f962b895a5667bb11b25149223ea0b006d7e64
 ALL_DCCS_data <- read_csv("data/ALL_DCCS_data.csv") %>%
   mutate(userID = factor(userID))
 missing_users<-c("16902", "16806", "16939" ,"16989" ,"17047", "17050","17577")
@@ -24,7 +29,7 @@ count <- AYCET_DCCS %>%
   group_by(userID) %>%
   summarize(n = n()) %>%
   filter(n > 1)
-table(AYCET_DCCS$highestLevel_user)
+
 #remove variables with many NAs; change variable types; convert ordered factors to numbers to impute missing data
 AYCET_DCCS <- AYCET_DCCS %>%
   select(-c(grep("_sess_6",colnames(AYCET_DCCS)))) %>%
@@ -333,11 +338,14 @@ AYCET_DCCS <- AYCET_DCCS %>%
 
 #colnames(AYCET_DCCS)
 
+<<<<<<< HEAD
 NAs_per_col <- colSums(is.na(AYCET_DCCS))
 # need to replace all NA's with 0 (absent users)
 AYCET_DCCS<-AYCET_DCCS%>%select(-dateTime.x, -dateTime.y)
 AYCET_DCCS<-AYCET_DCCS%>% 
   replace_na(set_names(as.list(rep(0, length(.))), names(.)))
+=======
+>>>>>>> 13f962b895a5667bb11b25149223ea0b006d7e64
 
 #Define & Add outcomes for DCCS
   #Already calculated - improvement (based on change in DCCS NIH Score), DCCS$ImproverScore
@@ -416,7 +424,7 @@ cat(perf.lasso@y.values[[1]])
 ###########################
   
 #Need to remove variables with many NAs, 
-#or replace NAs with 0 for all of the AYCET data. Are a few people just missing from the DCCS data completely?
+#or replace NAs with 0 for all of the AYCET data.
 
 NAs_per_col <- data.frame(matrix(ncol = 2, nrow = 0))
 NAs_per_col <- colSums(is.na(AYCET_DCCS))
@@ -427,9 +435,9 @@ names(NAs_per_col)<-c("totalNA")
 NAs_per_col<-NAs_per_col%>%arrange(-totalNA)
 LassoNIHScore <- model.matrix(ImproverScore ~ ., AYCET_DCCS)[,-1]
 
-#Lasso 1: Which variables are associated with improvement in NIH Score?
+#Lasso 1: Which game play features are associated with improvement in DCCS NIH Score?
 ImproverScore
 
-#Lasso 2: Which variables are associated with high accuracy at the end?
+#Lasso 2: Which game play features are associated with high accuracy in the DCCS Accuracy outcome?
 
-#Lasso 3: Which variables are associated with low reaction times at the end (fast, correct responses)?
+#Lasso 3: Which game play features are associated with low reaction times in DCCS (high scores = fast, correct responses)?

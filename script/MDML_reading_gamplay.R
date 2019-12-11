@@ -309,7 +309,7 @@ sessionCountDF <- ayce_40034_3005 %>%
   #table(ayce_40034_3005$Complexity, ayce_40034_3005$Difficulty)
   
 
-write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)  
+write.csv(ayce_40034_3005, "output/ayce_40034_3005.csv", row.names = F)  
 #######USER  
   #Variables per user
   #The fastest reaction time for Hits (correct responses)
@@ -549,7 +549,7 @@ afterWrongs <- ayce_40034_3005 %>%
   #str(aggregateUsers)
   aggregate$DPrime_user <- (qnorm(aggregate$HitRate_user) - qnorm(aggregate$FARate_user))  
     
-  write.csv(aggregate, "data/aggregate_user.csv", row.names = F)  
+  write.csv(aggregate, "output/aggregate_user.csv", row.names = F)  
   #write.csv(aggregate, "Desktop/MDML/MDML-finalProject/MDML-finalProject/data/aggregate_user.csv", row.names = F)  
 
 #########  SESSION
@@ -661,7 +661,7 @@ afterWrongs <- ayce_40034_3005 %>%
                                                          "percentCorrect_sess", "HitRate_sess", "FARate_sess", "DPrime_sess"))
   
   #write.csv(aggregateSessWide, "Desktop/MDML/MDML-finalProject/MDML-finalProject/data/aggregate_session.csv", row.names = F)  
-  write.csv(aggregateSessWide, "data/aggregate_session.csv", row.names = F)  
+  write.csv(aggregateSessWide, "output/aggregate_session.csv", row.names = F)  
   
   #########  DIFFICULTY
   #Variables per user per complexity (translated to Difficulty as easy, medium, hard just to simplify)
@@ -772,7 +772,7 @@ afterWrongs <- ayce_40034_3005 %>%
                                                            "WRONG_diff", "Wrong_AvgRT_diff", "Wrong_SDRT_diff",
                                                            "highestLevelPct_diff", "percentCorrect_diff", "HitRate_diff", "FARate_diff",
                                                            "DPrime_diff"))
-  write.csv(aggregateDiffWide, "data/aggregate_difficulty.csv", row.names = F)  
+  write.csv(aggregateDiffWide, "output/aggregate_difficulty.csv", row.names = F)  
   #write.csv(aggregateDiffWide, "Desktop/MDML/MDML-finalProject/MDML-finalProject/data/aggregate_difficulty.csv", row.names = F)  
 #Aggregate everything at the user level and bind columns from the user level, session level, and difficulty
 aggregate <- arrange(aggregate, accessCode, userID)
