@@ -12,7 +12,8 @@ AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") %>%
   mutate(userID = factor(userID))
 
 ALL_DCCS_data <- read_csv("data/ALL_DCCS_data.csv") %>%
-  mutate(userID = factor(userID))
+  mutate(userID = factor(userID)) %>%
+  select(-c("dateTime.x", "dateTime.y"))
 
 #Merge by userID so each row represents one participant
 AYCET_DCCS <- left_join(AYCET_gameplay_aggregated, ALL_DCCS_data, by = c("userID"))
@@ -34,7 +35,7 @@ AYCET_DCCS <- AYCET_DCCS %>%
   #Drop columns that are not data for model or missing too much data
   select(-c(grep("_sess_6",colnames(AYCET_DCCS)))) %>%
   select(-c(grep("_sess_5",colnames(AYCET_DCCS)))) %>%
-  select(-c("accessCode", "userID", "dateTime.x", "dateTime.y")) %>%
+  select(-c("accessCode", "userID")) %>%
   #Recode factor levels
   mutate(highestLevel_user = case_when( highestLevel_user == "SpaceCakesLevel 0-0" ~ 1, 
                                         highestLevel_user == "SpaceCakesLevel 0-1" ~ 2, 
@@ -300,64 +301,20 @@ AYCET_DCCS <- AYCET_DCCS %>%
                                           highestLevel_sess_4 == "SpaceCakesLevel 6-0" ~ 31, 
                                           highestLevel_sess_4 == "SpaceCakesLevel 6-1" ~ 32,  
                                           highestLevel_sess_4 == "SpaceCakesLevel 6-2" ~ 33),
-         highestLevel_sess_5 = case_when( highestLevel_sess_5 == "SpaceCakesLevel 0-0" ~ 1, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 0-1" ~ 2, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 0-2" ~ 3,
-                                          highestLevel_sess_5 == "SpaceCakesLevel 0-3" ~ 4, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 0-4" ~ 5, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 1-0" ~ 6, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 1-1" ~ 7,
-                                          highestLevel_sess_5 == "SpaceCakesLevel 1-2" ~ 8, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 1-3" ~ 9, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 1-4" ~ 10, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 2-0" ~ 11,
-                                          highestLevel_sess_5 == "SpaceCakesLevel 2-1" ~ 12, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 2-2" ~ 13, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 2-3" ~ 14, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 2-4" ~ 15,
-                                          highestLevel_sess_5 == "SpaceCakesLevel 3-0" ~ 16, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 3-1" ~ 17, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 3-2" ~ 18, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 3-3" ~ 19, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 3-4" ~ 20, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 4-0" ~ 21, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 4-1" ~ 22, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 4-2" ~ 23,
-                                          highestLevel_sess_5 == "SpaceCakesLevel 4-3" ~ 24,  
-                                          highestLevel_sess_5 == "SpaceCakesLevel 4-4" ~ 25, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 5-0" ~ 26, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 5-1" ~ 27,
-                                          highestLevel_sess_5 == "SpaceCakesLevel 5-2" ~ 28,  
-                                          highestLevel_sess_5 == "SpaceCakesLevel 5-3" ~ 29,  
-                                          highestLevel_sess_5 == "SpaceCakesLevel 5-4" ~ 30,  
-                                          highestLevel_sess_5 == "SpaceCakesLevel 6-0" ~ 31, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 6-1" ~ 32,  
-                                          highestLevel_sess_5 == "SpaceCakesLevel 6-2" ~ 33),
          #Recode T/F as 1/0 for modeling
         ImproverScore = case_when(ImproverScore == TRUE ~ 1, 
                                   ImproverScore == FALSE ~ 0)) %>%
-  #replace NAs with 0
+        #replace NAs with 0
         replace_na(set_names(as.list(rep(0, length(.))), names(.)))
 
 
-#Define & Add outcomes for DCCS
-  #Already calculated - improvement (based on change in DCCS NIH Score), DCCS$ImproverScore
-  #New: Above the median, Accuracy of 5 vs below five
-  #New: Above the median, RT Score of 2.7 vs below 2.7
-
-#test and train data using 5 fold cross validation
-#precision and accuracy graphs
 
 ###########################
-#LASSO Template
-#identify columns that have Na's
-#which session 5 6 can be gotten rid of
-#anything with fewer than 50% of people
-#do we impute mean, 0 or complete cases
-#RT impute mean
+#LASSO: 'Improver' Based on change in NIH Score
+
 #split to test train
 
-LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS%>%select(-ImproverScore))
+LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore))
 LassoNIHScore_y <-AYCET_DCCS$ImproverScore
 
 #TRAIN DATA SET
