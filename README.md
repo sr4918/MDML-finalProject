@@ -45,4 +45,4 @@ Additional cleaning and data restructuring was required in preparation of the re
 
 Corinne was primarily responsible for importing, cleaning, and prepocessing the AYCET data. 
 Sameen was primarily responsible for importing, cleaning, and prepocessing the DCCS data.
-Both collaborated on refining the data cleaning details, preparing the data for analysis, ans conducting and interpreting the lasso regression. Both contributed to the written report.
+Both collaborated on refining the data cleaning details, preparing the data for analysis, and conducting and interpreting the lasso regression. Both contributed to the written report.
