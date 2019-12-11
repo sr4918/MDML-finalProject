@@ -472,7 +472,7 @@ write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)
                                         values_from = c("DifficultyTrialCount", "Difficulty_Hits", "Accuracy_Pct_diff"))
       
   
-#Accuracy for beginning, middle, end of session
+#Accuracy for beginning, middle, end of session (thirds)
 ayce_40034_3005 <- ayce_40034_3005 %>%
   group_by(userID, sesCount) %>%
     arrange(logTimestamp) %>%
