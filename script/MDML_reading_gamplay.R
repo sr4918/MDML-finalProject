@@ -14,7 +14,7 @@ require(compareDF)
 require(sqldf)
 
 #setwd("corinnebrenner")
-#getwd()
+getwd()
 ####
 
 #length(unique(ayce_40034_3005Edit$userID))
@@ -29,21 +29,21 @@ accessCodes <- c("ATHBF18", "ATHF18", "ATM1F18", "ATMBF18")
 
 #Read in the files and append the gameCodes from different access codes to each other
 
-#gameCode 4003
-filepaths_4003 <- expand.grid(x=accessCodes) %>% 
-#{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
-{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
-
-
-ayce_4003 <- do.call(rbind, lapply(filepaths_4003, read_csv))
-
-#gameCode 4004
-filepaths_4004 <- expand.grid(x=accessCodes) %>% 
-#{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
-{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
-
-
-ayce_4004 <- do.call(rbind, lapply(filepaths_4004, read_csv))
+  #gameCode 4003
+  filepaths_4003 <- expand.grid(x=accessCodes) %>% 
+  {paste0('../../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
+  #{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
+  
+  
+    ayce_4003 <- do.call(rbind, lapply(filepaths_4003, read_csv))
+  
+  #gameCode 4004
+  filepaths_4004 <- expand.grid(x=accessCodes) %>% 
+  {paste0('../../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
+  #{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
+  
+  
+    ayce_4004 <- do.call(rbind, lapply(filepaths_4004, read_csv))
 
 #Change variable types and clean known issues with duplicate jots in gameCode 4003 and 4004 files
 ayce_4003 <- ayce_4003 %>%
@@ -102,7 +102,7 @@ ayce_4003 <- ayce_4003 %>%
   slice(1) %>% #remove duplicate logged items
   ungroup()
 
-#from 243580 to 243557 rows
+  #from 243580 to 243557 rows
 
 
 ayce_4004 <- ayce_4004 %>%
@@ -174,8 +174,8 @@ ayce_40034 <- merge(ayce_4003, ayce_4004[,c("accessCode", "userID", "sesID", "gs
 
 #gameCode 3005
 filepaths_3005 <- expand.grid(x=accessCodes) %>% 
-#{paste0('../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3005.csv')}
-{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3005.csv')}
+{paste0('../../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3005.csv')}
+#{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_3005.csv')}
 
 
 ayce_3005 <- do.call(rbind, lapply(filepaths_3005, read_csv))
@@ -278,7 +278,7 @@ ayce_40034_3005 <- ayce_40034_3005 %>%
 ayce_40034_3005 <- ayce_40034_3005 %>%
   mutate(gameLevelShort = gsub('-[^-]*$', '', gameLevel),
           date = as.Date(logTimestamp, tz = ""))
-  
+#  table(ayce_40034_3005$gameLevelShort)
 #Create a new session count using date information, not just sessionID; sessionID is unique for every time a participant logs in
 sessionCountDF <- ayce_40034_3005 %>%
   arrange(userID, date, sesID, logTimestamp, gsUserID, gameLevelShort, gameLevel, alienID) %>%
@@ -321,11 +321,11 @@ write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)
   #Highest level of the game reached per user
   highestLevels_user <- ayce_40034_3005 %>%
     group_by(userID) %>%
-    summarize(highestLevel_user = max(gameLevel, na.rm = TRUE))
+    summarize(highestLevel_user = max(gameLevelShort, na.rm = TRUE))
   
   #Filter rows to get counts of trials within the highest level (per user)
   highestLevelCounts_user <- left_join(ayce_40034_3005, highestLevels_user, by = c("userID") ) %>%
-    filter (gameLevel == highestLevel_user) %>%
+    filter (gameLevelShort == highestLevel_user) %>%
     group_by(userID) %>%
     summarize(highestLevelTrialCount_user = n()) 
   
@@ -472,7 +472,7 @@ write.csv(ayce_40034_3005, "data/ayce_40034_3005.csv", row.names = F)
                                         values_from = c("DifficultyTrialCount", "Difficulty_Hits", "Accuracy_Pct_diff"))
       
   
-#Accuracy for beginning, middle, end of session
+#Accuracy for beginning, middle, end of session (thirds)
 ayce_40034_3005 <- ayce_40034_3005 %>%
   group_by(userID, sesCount) %>%
     arrange(logTimestamp) %>%
@@ -549,8 +549,8 @@ afterWrongs <- ayce_40034_3005 %>%
   #str(aggregateUsers)
   aggregate$DPrime_user <- (qnorm(aggregate$HitRate_user) - qnorm(aggregate$FARate_user))  
     
-#write.csv(aggregate, "data/aggregate_user.csv", row.names = F)  
-  write.csv(aggregate, "Desktop/MDML/MDML-finalProject/MDML-finalProject/data/aggregate_user.csv", row.names = F)  
+  write.csv(aggregate, "data/aggregate_user.csv", row.names = F)  
+  #write.csv(aggregate, "Desktop/MDML/MDML-finalProject/MDML-finalProject/data/aggregate_user.csv", row.names = F)  
 
 #########  SESSION
 #Variables per user per session
@@ -563,11 +563,11 @@ afterWrongs <- ayce_40034_3005 %>%
   #Highest level per user per session
   highestLevels_sess <- ayce_40034_3005 %>%
     group_by(userID, sesCount) %>%
-    summarize(highestLevel_sess = max(gameLevel, na.rm = TRUE))
+    summarize(highestLevel_sess = max(gameLevelShort, na.rm = TRUE))
   
   #Filter rows to get counts of trials within the highest level (per user per session)
   highestLevelCount_sess <- left_join(ayce_40034_3005, highestLevels_sess, by = c("userID", "sesCount") ) %>%
-    filter (gameLevel == highestLevel_sess) %>%
+    filter (gameLevelShort == highestLevel_sess) %>%
     group_by(userID, sesCount) %>%
     summarize(highestTrialCount_sess = n()) 
   
@@ -660,9 +660,9 @@ afterWrongs <- ayce_40034_3005 %>%
                                                          "WRONG_sess", "Wrong_AvgRT_sess", "Wrong_SDRT_sess", "highestLevelPct_sess", 
                                                          "percentCorrect_sess", "HitRate_sess", "FARate_sess", "DPrime_sess"))
   
-  write.csv(aggregateSessWide, "Desktop/MDML/MDML-finalProject/MDML-finalProject/data/aggregate_session.csv", row.names = F)  
+  #write.csv(aggregateSessWide, "Desktop/MDML/MDML-finalProject/MDML-finalProject/data/aggregate_session.csv", row.names = F)  
+  write.csv(aggregateSessWide, "data/aggregate_session.csv", row.names = F)  
   
-  #write.csv(aggregateSessWide, "data/aggregate_session.csv", row.names = F)  
   #########  DIFFICULTY
   #Variables per user per complexity (translated to Difficulty as easy, medium, hard just to simplify)
   #table(ayce_40034_3005$Complexity)
@@ -677,11 +677,11 @@ afterWrongs <- ayce_40034_3005 %>%
   #Highest level per user per difficulty
   highestLevels_diff <- ayce_40034_3005 %>%
     group_by(userID, Difficulty) %>%
-    summarize(highestLevel_diff = max(gameLevel, na.rm = TRUE))
+    summarize(highestLevel_diff = max(gameLevelShort, na.rm = TRUE))
   
   #Filter rows to get counts of trials within the highest level (per user per difficulty)
   highestLevelCounts_diff <- left_join(ayce_40034_3005, highestLevels_diff, by = c("userID", "Difficulty") ) %>%
-    filter (gameLevel == highestLevel_diff) %>%
+    filter (gameLevelShort == highestLevel_diff) %>%
     group_by(userID, Difficulty) %>%
     summarize(highestLevelTrialCount_diff = n()) 
   
@@ -772,8 +772,8 @@ afterWrongs <- ayce_40034_3005 %>%
                                                            "WRONG_diff", "Wrong_AvgRT_diff", "Wrong_SDRT_diff",
                                                            "highestLevelPct_diff", "percentCorrect_diff", "HitRate_diff", "FARate_diff",
                                                            "DPrime_diff"))
-  
-write.csv(aggregateDiffWide, "Desktop/MDML/MDML-finalProject/MDML-finalProject/data/aggregate_difficulty.csv", row.names = F)  
+  write.csv(aggregateDiffWide, "data/aggregate_difficulty.csv", row.names = F)  
+  #write.csv(aggregateDiffWide, "Desktop/MDML/MDML-finalProject/MDML-finalProject/data/aggregate_difficulty.csv", row.names = F)  
 #Aggregate everything at the user level and bind columns from the user level, session level, and difficulty
 aggregate <- arrange(aggregate, accessCode, userID)
 aggregateDiffWide <- arrange(aggregateDiffWide, accessCode, userID)
@@ -789,4 +789,5 @@ gameplay_aggregated <- gameplay_aggregated %>%
   select(-c("avgRT_afterWrong_NA"))
   
 #Export
-  write.csv(gameplay_aggregated, "Desktop/MDML/MDML-finalProject/MDML-finalProject/data/AYCET_gameplay_aggregated.csv", row.names = F)
+  write.csv(gameplay_aggregated, "data/AYCET_gameplay_aggregated.csv", row.names = F)
+  #write.csv(gameplay_aggregated, "Desktop/MDML/MDML-finalProject/MDML-finalProject/data/AYCET_gameplay_aggregated.csv", row.names = F)
