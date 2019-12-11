@@ -29,21 +29,21 @@ accessCodes <- c("ATHBF18", "ATHF18", "ATM1F18", "ATMBF18")
 
 #Read in the files and append the gameCodes from different access codes to each other
 
-#gameCode 4003
-filepaths_4003 <- expand.grid(x=accessCodes) %>% 
-{paste0('../../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
-#{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
-
-
-ayce_4003 <- do.call(rbind, lapply(filepaths_4003, read_csv))
-
-#gameCode 4004
-filepaths_4004 <- expand.grid(x=accessCodes) %>% 
-{paste0('../../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
-#{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
-
-
-ayce_4004 <- do.call(rbind, lapply(filepaths_4004, read_csv))
+  #gameCode 4003
+  filepaths_4003 <- expand.grid(x=accessCodes) %>% 
+  {paste0('../../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
+  #{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4003.csv')}
+  
+  
+    ayce_4003 <- do.call(rbind, lapply(filepaths_4003, read_csv))
+  
+  #gameCode 4004
+  filepaths_4004 <- expand.grid(x=accessCodes) %>% 
+  {paste0('../../../../Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
+  #{paste0('./Desktop/FALL2018_Intervention/PLAY/', .$x, '/AYCE/ayce_4004.csv')}
+  
+  
+    ayce_4004 <- do.call(rbind, lapply(filepaths_4004, read_csv))
 
 #Change variable types and clean known issues with duplicate jots in gameCode 4003 and 4004 files
 ayce_4003 <- ayce_4003 %>%
@@ -102,7 +102,7 @@ ayce_4003 <- ayce_4003 %>%
   slice(1) %>% #remove duplicate logged items
   ungroup()
 
-#from 243580 to 243557 rows
+  #from 243580 to 243557 rows
 
 
 ayce_4004 <- ayce_4004 %>%
@@ -278,7 +278,7 @@ ayce_40034_3005 <- ayce_40034_3005 %>%
 ayce_40034_3005 <- ayce_40034_3005 %>%
   mutate(gameLevelShort = gsub('-[^-]*$', '', gameLevel),
           date = as.Date(logTimestamp, tz = ""))
-  table(ayce_40034_3005$gameLevelShort)
+#  table(ayce_40034_3005$gameLevelShort)
 #Create a new session count using date information, not just sessionID; sessionID is unique for every time a participant logs in
 sessionCountDF <- ayce_40034_3005 %>%
   arrange(userID, date, sesID, logTimestamp, gsUserID, gameLevelShort, gameLevel, alienID) %>%
