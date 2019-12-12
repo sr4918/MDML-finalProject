@@ -5,6 +5,8 @@ require(ranger)
 require(glmnet)
 require(dplyr)
 require(ggplot2)
+require(grid)
+require(gridExtra)
 
 
 #For Lasso regression 
@@ -354,14 +356,14 @@ cv.out = cv.glmnet(x_train, y_train, alpha = 1, family = 'binomial', intercept=F
 plot(cv.out) # Draw plot of training MSE as a function of lambda
 bestlam = cv.out$lambda.min # Select lamda that minimizes training binomial deviance
 lasso_pred = predict(cv.out, s = bestlam, newx = x_test, type = 'response') # Use best lambda to predict test data
-pred_lasso <- prediction(lasso_pred, y_test)
-perf.lasso <- performance(pred_lasso,'auc')
-cat(perf.lasso@y.values[[1]])
+pred_lasso <- prediction(lasso_pred, y_test) #Conduct predictions
+perf.lasso <- performance(pred_lasso,'auc') #Evaluate performance
+cat(perf.lasso@y.values[[1]]) #Obtain AUC value
 
 out = glmnet(LassoNIHScore_x, LassoNIHScore_y, alpha = 1, lambda = grid,intercept=FALSE) # Fit lasso model on full dataset
 lasso_coef = predict(out, type = "coefficients", s = bestlam) # Display coefficients using lambda chosen by CV
-lasso_coef
-str(lasso_coef)
+#lasso_coef
+#str(lasso_coef)
 ###Bar graph of coefficients
   #Extract coefficient data & change variable type for merge
   lasso_coef_df <- as.data.frame(summary(lasso_coef))
@@ -382,7 +384,7 @@ str(lasso_coef)
     geom_bar(stat = "identity") +
     scale_fill_gradient(low = "#0b200e", high = "#37a146") +
     coord_flip() +
-    labs(title = "Model Coefficients for Outcome as Change in NIH Score")
+    labs(title = "+Change in NIH Score")
 
   
 ###########################
@@ -434,8 +436,7 @@ str(lasso_coef)
     geom_bar(stat = "identity") +
     scale_fill_gradient(low = "#0b200e", high = "#37a146") +
     coord_flip() +
-    labs(title = "Model Coefficients for Outcome as Change in Accuracy")
-  
+    labs(title = "Posttest Accuracy Score = 5")
   
   ###################
   
@@ -487,10 +488,13 @@ str(lasso_coef)
     geom_bar(stat = "identity") +
     scale_fill_gradient(low = "#0b200e", high = "#37a146") +
     coord_flip() +
-    labs(title = "Model Coefficients for Outcome as Change in Reaction Time")
-  
-  
-  
+    labs(title = "Posttest RT Score > 2.7")
 
 
 #######################################
+  
+  #Combine graphs
+  
+  coefficient_graph <- grid.arrange(ImproverScoreFeatureGraph, ImproverAccuracyFeatureGraph, ImproverRTimeFeatureGraph, ncol = 3,
+               top = textGrob("Model Coefficients for Three Outcomes", gp=gpar(fontsize=20)))
+ggsave("images/coefficient_graph.png", coefficient_graph, width = 15, height = 5, units = "in")
