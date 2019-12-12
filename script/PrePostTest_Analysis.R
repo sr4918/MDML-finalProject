@@ -24,7 +24,7 @@ library(ggpubr)
 
       #multiple scatter plots visualization
       DCCS_scatterplot<- ggpairs(cor_data_DCCS,title="Correlation Plot: Pre and Post Test Scores", aes(fill = "pink"))
-      ggsave("images/DCCS_prepost_scatterplot.png",DCCS_scatterplot)
+      ggsave("images/DCCS_prepost_scatterplot.png",DCCS_scatterplot,width = 14, height = 6, units ="in" )
 
 #FLANKER
       data2<-read.csv("output/combine_pre-post_FLANKER.csv")
@@ -85,7 +85,7 @@ library(ggpubr)
        
       ggsave("images/PrePostPlots.png", t2)
       
-      #see how many get a score mre than 4 on DCCS
+     
       DCCS$ImproverScore<-ifelse(DCCS$DiffScore>0, 1, 0)
       DCCS$ImproverAccuracy<-ifelse(DCCS$DiffAccuracy>0, 1, 0)
       DCCS$ImproverRT<-ifelse(DCCS$DiffRT >0, 1, 0)
