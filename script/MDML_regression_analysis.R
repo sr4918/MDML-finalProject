@@ -310,12 +310,10 @@ AYCET_DCCS <- AYCET_DCCS %>%
         replace_na(set_names(as.list(rep(0, length(.))), names(.)))
 
 
-<<<<<<< HEAD
 #colnames(AYCET_DCCS)
 
 NAs_per_col <- colSums(is.na(AYCET_DCCS))
 # need to replace all NA's with 0 (absent users)
-AYCET_DCCS<-AYCET_DCCS%>%select(-dateTime.x, -dateTime.y)
 AYCET_DCCS<-AYCET_DCCS%>% 
   replace_na(set_names(as.list(rep(0, length(.))), names(.)))
 
