@@ -38,7 +38,7 @@ count <- AYCET_DCCS %>%
 AYCET_DCCS <- AYCET_DCCS %>%
   #Drop columns that are not data for model or missing too much data
   select(-matches("_sess_6|_sess_5")) %>%
-  select(-c("accessCode", "userID")) %>%
+  select(-c("accessCode", "userID","pre_nihScore", "post_nihScore", "pre_nihAccuracy", "post_nihAccuracy", "pre_nihRTScore", "post_nihRTScore", "DiffScore", "DiffAccuracy", "DiffRT")) %>%
   #Recode factor levels
   mutate(highestLevel_user = case_when( highestLevel_user == "SpaceCakesLevel 0-0" ~ 1, 
                                         highestLevel_user == "SpaceCakesLevel 0-1" ~ 2, 
@@ -362,7 +362,8 @@ lasso_coef = predict(out, type = "coefficients", s = bestlam) # Display coeffici
   #lasso_coef_df <- as.data.frame(lasso_coef@Dimnames[[1]], lasso_coef@x)
   lasso_coef_df <-  left_join(lasso_coef_df, lasso_coef_feature_names, by = "i") %>%
     arrange(desc(abs(x))) %>%
-    rename(Coefficient = x)
+    rename(Coefficient = x)%>%
+    slice(1:10)
 
   #Make Variable an ordered factor so it will be in order for ggplot
       lasso_coef_df$Variable <- factor(lasso_coef_df$Variable, levels = lasso_coef_df$Variable[order( abs(lasso_coef_df$Coefficient))])
