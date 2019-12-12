@@ -1,5 +1,5 @@
 # MDML Final Project 2019
-## Associating Features of Game Play with Improved Executive Function Using Lasso Regression
+## Associating Features of Game Play with Executive Function Skill Using Lasso Regression
 ### Corinne Brenner & Sameen Reza
 
 ## Getting Started
