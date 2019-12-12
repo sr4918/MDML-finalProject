@@ -4,6 +4,7 @@ require(ROCR)
 require(ranger)
 require(glmnet)
 require(dplyr)
+require(ggplot2)
 
 
 #For Lasso regression 
@@ -13,14 +14,17 @@ AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") %>%m
 #Read in AYCET gameplay data and DCCS data; change userID to factor for merge
 
 ALL_DCCS_data <- read_csv("data/ALL_DCCS_data.csv") %>%
-  mutate(userID = factor(userID))
-missing_users<-c("16902", "16806", "16939" ,"16989" ,"17047", "17050","17577")
-
+  mutate(userID = factor(userID)) %>%
+  select(-c("dateTime.x", "dateTime.y"))
 
 #Merge by userID so each row represents one participant
 AYCET_DCCS <- left_join(AYCET_gameplay_aggregated, ALL_DCCS_data, by = c("userID"))
 
-AYCET_DCCS<-AYCET_DCCS%>%filter(!userID %in% missing_users)
+#Remove users with missing DCCS data
+missing_users<-c("16902", "16806", "16939" ,"16989" ,"17047", "17050","17577")
+
+AYCET_DCCS <- AYCET_DCCS %>%
+  filter(!userID %in% missing_users)
 
 #check that each row is a unique participant
 count <- AYCET_DCCS %>%
@@ -30,8 +34,11 @@ count <- AYCET_DCCS %>%
 
 #remove variables with many NAs; change variable types; convert ordered factors to numbers to impute missing data
 AYCET_DCCS <- AYCET_DCCS %>%
+  #Drop columns that are not data for model or missing too much data
   select(-c(grep("_sess_6",colnames(AYCET_DCCS)))) %>%
+  select(-c(grep("_sess_5",colnames(AYCET_DCCS)))) %>%
   select(-c("accessCode", "userID")) %>%
+  #Recode factor levels
   mutate(highestLevel_user = case_when( highestLevel_user == "SpaceCakesLevel 0-0" ~ 1, 
                                         highestLevel_user == "SpaceCakesLevel 0-1" ~ 2, 
                                         highestLevel_user == "SpaceCakesLevel 0-2" ~ 3,
@@ -296,44 +303,14 @@ AYCET_DCCS <- AYCET_DCCS %>%
                                           highestLevel_sess_4 == "SpaceCakesLevel 6-0" ~ 31, 
                                           highestLevel_sess_4 == "SpaceCakesLevel 6-1" ~ 32,  
                                           highestLevel_sess_4 == "SpaceCakesLevel 6-2" ~ 33),
-         highestLevel_sess_5 = case_when( highestLevel_sess_5 == "SpaceCakesLevel 0-0" ~ 1, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 0-1" ~ 2, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 0-2" ~ 3,
-                                          highestLevel_sess_5 == "SpaceCakesLevel 0-3" ~ 4, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 0-4" ~ 5, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 1-0" ~ 6, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 1-1" ~ 7,
-                                          highestLevel_sess_5 == "SpaceCakesLevel 1-2" ~ 8, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 1-3" ~ 9, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 1-4" ~ 10, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 2-0" ~ 11,
-                                          highestLevel_sess_5 == "SpaceCakesLevel 2-1" ~ 12, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 2-2" ~ 13, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 2-3" ~ 14, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 2-4" ~ 15,
-                                          highestLevel_sess_5 == "SpaceCakesLevel 3-0" ~ 16, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 3-1" ~ 17, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 3-2" ~ 18, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 3-3" ~ 19, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 3-4" ~ 20, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 4-0" ~ 21, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 4-1" ~ 22, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 4-2" ~ 23,
-                                          highestLevel_sess_5 == "SpaceCakesLevel 4-3" ~ 24,  
-                                          highestLevel_sess_5 == "SpaceCakesLevel 4-4" ~ 25, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 5-0" ~ 26, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 5-1" ~ 27,
-                                          highestLevel_sess_5 == "SpaceCakesLevel 5-2" ~ 28,  
-                                          highestLevel_sess_5 == "SpaceCakesLevel 5-3" ~ 29,  
-                                          highestLevel_sess_5 == "SpaceCakesLevel 5-4" ~ 30,  
-                                          highestLevel_sess_5 == "SpaceCakesLevel 6-0" ~ 31, 
-                                          highestLevel_sess_5 == "SpaceCakesLevel 6-1" ~ 32,  
-                                          highestLevel_sess_5 == "SpaceCakesLevel 6-2" ~ 33),
+         #Recode T/F as 1/0 for modeling
         ImproverScore = case_when(ImproverScore == TRUE ~ 1, 
                                   ImproverScore == FALSE ~ 0)) %>%
-  select(-c("ImproverAccuracy", "ImproverRT", "AllImprove", "ImprovedPostScoreGT7"))
+        #replace NAs with 0
+        replace_na(set_names(as.list(rep(0, length(.))), names(.)))
 
 
+<<<<<<< HEAD
 #colnames(AYCET_DCCS)
 
 NAs_per_col <- colSums(is.na(AYCET_DCCS))
@@ -351,15 +328,11 @@ AYCET_DCCS<-AYCET_DCCS%>%
 #precision and accuracy graphs
 
 ###########################
-#LASSO Template
-#identify columsn that have Na's
-#which session 5 6 can be gotten rid of
-#anything with fewer than 50% of people
-#do we impute mean, 0 or complete cases
-#RT impute mean
-#split to test train
+#LASSO: 'Improver' Based on change in NIH Score; outcome of interest is ImproverScore
 
-LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS%>%select(-ImproverScore))
+#split to test train
+#Remove all outcomes
+LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
 LassoNIHScore_y <-AYCET_DCCS$ImproverScore
 
 #TRAIN DATA SET
@@ -382,7 +355,7 @@ grid = 10^seq(10, -2, length = 100)
 cv.out = cv.glmnet(x_train, y_train, alpha = 1, family = 'binomial') # Fit lasso model on training data
 plot(cv.out) # Draw plot of training MSE as a function of lambda
 bestlam = cv.out$lambda.min # Select lamda that minimizes training binomial deviance
-lasso_pred = predict(model_lasso, s = bestlam, newx = x_test, type = 'response') # Use best lambda to predict test data
+lasso_pred = predict(cv.out, s = bestlam, newx = x_test, type = 'response') # Use best lambda to predict test data
 pred_lasso <- prediction(lasso_pred, y_test)
 perf.lasso <- performance(pred_lasso,'auc')
 cat(perf.lasso@y.values[[1]])
@@ -390,8 +363,44 @@ cat(perf.lasso@y.values[[1]])
 out = glmnet(LassoNIHScore_x, LassoNIHScore_y, alpha = 1, lambda = grid) # Fit lasso model on full dataset
 lasso_coef = predict(out, type = "coefficients", s = bestlam) # Display coefficients using lambda chosen by CV
 lasso_coef
+str(lasso_coef)
+###Bar graph of coefficients
+  #Extract coefficient data & change variable type for merge
+  lasso_coef_df <- as.data.frame(summary(lasso_coef))
+  lasso_coef_df$i <- as.character(lasso_coef_df$i)
+  
+  lasso_coef_feature_names <- as.data.frame(cbind(seq(1:length(lasso_coef@Dimnames[[1]])), lasso_coef@Dimnames[[1]]))
+  colnames(lasso_coef_feature_names) <- c("i", "Variable")
+  
+  #lasso_coef_df <- as.data.frame(lasso_coef@Dimnames[[1]], lasso_coef@x)
+  lasso_coef_df <-  left_join(lasso_coef_df, lasso_coef_feature_names, by = "i") %>%
+    arrange(desc(abs(x))) %>%
+    rename(coefficient = x)
+
+  ImproverScoreFeatureGraph <- ggplot(data = lasso_coef_df, aes(x = Variable, y = coefficient)) +
+    geom_bar(stat = "identity")
 
 
+
+#######################################
+#Is everything below just scratch material?
+data <- rbind(training_set, testing_set[,1:12])
+
+x <- model.matrix(outcome ~ inspection_date + borough + cuisine + inspection_year + month +
+                    weekday + num_previous_low_inspections + num_previous_med_inspections +
+                    num_previous_high_inspections + num_previous_closings, data)[,-1]
+
+
+x_train <- x[1:nrow(training_set),]
+y_train <- training_set$outcome
+
+x_test <- x[nrow(training_set)+1 :nrow(testing_set),] 
+y_test <- testing_set$outcome
+
+
+# fit lasso and ridge
+#model_lasso <- glmnet(x_train, y_train, alpha=1, lambda=.01, family='binomial')
+model_lasso2 <- glmnet(x_train, y_train, alpha=1, lambda=.01, family='binomial', intercept=FALSE) #without intercept
 
 # 2. Generate predictions from both models on testing_set and calculate the AUC (for both models).
 prob_lasso <- predict(model_lasso2, x_test,type='response')
