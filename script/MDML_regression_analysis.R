@@ -34,7 +34,8 @@ count <- AYCET_DCCS %>%
   summarize(n = n()) %>%
   filter(n > 1)
 
-#remove variables with many NAs; change variable types; convert ordered factors to numbers to impute missing data
+#remove variables with many NAs; Remove variables with reaction times for missed responses 
+#change variable types; convert ordered factors to numbers to impute missing data
 AYCET_DCCS <- AYCET_DCCS %>%
   #Drop columns that are not data for model or missing too much data
   select(-matches("_sess_6|_sess_5|Miss_AvgRT_|Miss_SDRT_")) %>%
