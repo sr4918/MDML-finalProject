@@ -33,7 +33,7 @@ count <- AYCET_DCCS %>%
   filter(n > 1)
 
 #remove variables with many NAs; change variable types; convert ordered factors to numbers to impute missing data
-AYCET_DCCS2 <- AYCET_DCCS %>%
+AYCET_DCCS <- AYCET_DCCS %>%
   #Drop columns that are not data for model or missing too much data
   select(-matches("_sess_6|_sess_5")) %>%
   select(-c("accessCode", "userID")) %>%
@@ -308,13 +308,13 @@ AYCET_DCCS2 <- AYCET_DCCS %>%
         #replace NAs with 0
         replace_na(set_names(as.list(rep(0, length(.))), names(.)))
 
-colnames(AYCET_gameplay_aggregated)
-colnames(AYCET_DCCS)
+#colnames(AYCET_gameplay_aggregated)
+#colnames(AYCET_DCCS)
 
-NAs_per_col <- colSums(is.na(AYCET_DCCS))
+#NAs_per_col <- colSums(is.na(AYCET_DCCS))
 # need to replace all NA's with 0 (absent users)
-AYCET_DCCS<-AYCET_DCCS%>% 
-  replace_na(set_names(as.list(rep(0, length(.))), names(.)))
+#AYCET_DCCS<-AYCET_DCCS%>% 
+#  replace_na(set_names(as.list(rep(0, length(.))), names(.)))
 
 #Define & Add outcomes for DCCS
   #Already calculated - improvement (based on change in DCCS NIH Score), DCCS$ImproverScore
@@ -329,7 +329,7 @@ AYCET_DCCS<-AYCET_DCCS%>%
 
 #split to test train
 #Remove all outcomes
-LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
+LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7, -AllImprove))
 LassoNIHScore_y <-AYCET_DCCS$ImproverScore
 #LassoNIHScore_Acc_y <-AYCET_DCCS$ImproverAccuracy
 #LassoNIHScore_RT_y <-AYCET_DCCS$ImproverRT
