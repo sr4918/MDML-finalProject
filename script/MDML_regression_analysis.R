@@ -415,7 +415,8 @@ lasso_coef = predict(out, type = "coefficients", s = bestlam) # Display coeffici
   #lasso_coef_df <- as.data.frame(lasso_coef@Dimnames[[1]], lasso_coef@x)
   lasso_coef_Acc_df <-  left_join(lasso_coef_Acc_df, lasso_coef_Acc_feature_names, by = "i") %>%
     arrange(desc(abs(x))) %>%
-    rename(Coefficient = x)
+    rename(Coefficient = x)%>%
+    slice(1:10)
   
   #Make Variable an ordered factor so it will be in order for ggplot
   lasso_coef_Acc_df$Variable <- factor(lasso_coef_Acc_df$Variable, levels = lasso_coef_Acc_df$Variable[order( abs(lasso_coef_Acc_df$Coefficient))])
@@ -467,7 +468,8 @@ lasso_coef = predict(out, type = "coefficients", s = bestlam) # Display coeffici
   #lasso_coef_df <- as.data.frame(lasso_coef@Dimnames[[1]], lasso_coef@x)
   lasso_coef_RT_df <-  left_join(lasso_coef_RT_df, lasso_coef_RT_feature_names, by = "i") %>%
     arrange(desc(abs(x))) %>%
-    rename(Coefficient = x)
+    rename(Coefficient = x)%>%
+    slice(1:10)
   
   #Make Variable an ordered factor so it will be in order for ggplot
   lasso_coef_RT_df$Variable <- factor(lasso_coef_RT_df$Variable, levels = lasso_coef_RT_df$Variable[order( abs(lasso_coef_RT_df$Coefficient))])
