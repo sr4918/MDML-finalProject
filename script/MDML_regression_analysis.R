@@ -389,16 +389,16 @@ str(lasso_coef)
   
   #split to test train
   #Remove all outcomes
-  LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
-  LassoNIHScore_y <-AYCET_DCCS$ImproverAccuracy
+  LassoAcc_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7, -AllImprove))
+  LassoAcc_y <-AYCET_DCCS$ImproverAccuracy
   
   #TRAIN DATA SET
-  train = AYCET_DCCS %>%
-    sample_frac(0.6)
+  #train = AYCET_DCCS %>%
+  #  sample_frac(0.6)
   
   #TEST DATA SET
-  test = AYCET_DCCS %>%
-    setdiff(train)
+  #test = AYCET_DCCS %>%
+  #  setdiff(train)
   
   #TRAIN x and y    
   x_train_Acc = model.matrix(~., train%>%select(-ImproverAccuracy))
@@ -408,7 +408,7 @@ str(lasso_coef)
   x_test_Acc = model.matrix(~., test%>%select(-ImproverAccuracy))
   y_test_Acc <- test$ImproverAccuracy
   
-  grid = 10^seq(10, -2, length = 100)
+  #grid = 10^seq(10, -2, length = 100)
   cv.out_Acc = cv.glmnet(x_train_Acc, y_train_Acc, alpha = 1, family = 'binomial', intercept=FALSE) # Fit lasso model on training data
   plot(cv.out_Acc) 
   bestlam_Acc = cv.out_Acc$lambda.min # Select lamda that minimizes training binomial deviance
