@@ -4,6 +4,7 @@ require(ROCR)
 require(ranger)
 require(glmnet)
 require(dplyr)
+require(ggplot2)
 
 
 #For Lasso regression 
@@ -347,13 +348,20 @@ lasso_coef = predict(out, type = "coefficients", s = bestlam) # Display coeffici
 lasso_coef
 str(lasso_coef)
 ###Bar graph of coefficients
-lasso_coef_df <- as.data.frame(summary(lasso_coef))
-lasso_coef_feature_names <- as.data.frame(cbind(seq(1:length(lasso_coef@Dimnames[[1]])), lasso_coef@Dimnames[[1]]))
-colnames(lasso_coef_feature_names) <- c("Variable", "i")
+  #Extract coefficient data & change variable type for merge
+  lasso_coef_df <- as.data.frame(summary(lasso_coef))
+  lasso_coef_df$i <- as.character(lasso_coef_df$i)
+  
+  lasso_coef_feature_names <- as.data.frame(cbind(seq(1:length(lasso_coef@Dimnames[[1]])), lasso_coef@Dimnames[[1]]))
+  colnames(lasso_coef_feature_names) <- c("i", "Variable")
+  
+  #lasso_coef_df <- as.data.frame(lasso_coef@Dimnames[[1]], lasso_coef@x)
+  lasso_coef_df <-  left_join(lasso_coef_df, lasso_coef_feature_names, by = "i") %>%
+    arrange(desc(abs(x))) %>%
+    rename(coefficient = x)
 
-lasso_coef_df <- as.data.frame(lasso_coef@Dimnames[[1]], lasso_coef@x)
-
-
+  ImproverScoreFeatureGraph <- ggplot(data = lasso_coef_df, aes(x = Variable, y = coefficient)) +
+    geom_bar(stat = "identity")
 
 
 
