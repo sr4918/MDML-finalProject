@@ -403,8 +403,8 @@ str(lasso_coef)
   #TEST DATA SET
   test_Acc = AYCET_DCCS %>%
     setdiff(train_Acc)
-  
-  #TRAIN x and y    
+
+    #TRAIN x and y    
   x_train_Acc = model.matrix(~., train_Acc%>%select(-ImproverAccuracy))
   y_train_Acc = train_Acc$ImproverAccuracy
   
@@ -412,7 +412,7 @@ str(lasso_coef)
   x_test_Acc = model.matrix(~., test_Acc%>%select(-ImproverAccuracy))
   y_test_Acc <- test_Acc$ImproverAccuracy
   
-  grid = 10^seq(10, -2, length = 100)
+  #grid = 10^seq(10, -2, length = 100)
   cv.out_Acc = cv.glmnet(x_train_Acc, y_train_Acc, alpha = 1, family = 'binomial', intercept=FALSE) # Fit lasso model on training data
   plot(cv.out_Acc) 
   bestlam_Acc = cv.out_Acc$lambda.min # Select lamda that minimizes training binomial deviance
@@ -465,7 +465,7 @@ str(lasso_coef)
   #TEST DATA SET
   test_RT = AYCET_DCCS %>%
     setdiff(train_RT)
-  
+
   #TRAIN x and y    
   x_train_RT = model.matrix(~., train_RT%>%select(-ImproverRT))
   y_train_RT = train_RT$ImproverRT
@@ -474,7 +474,7 @@ str(lasso_coef)
   x_test_RT = model.matrix(~., test_RT%>%select(-ImproverRT))
   y_test_RT <- test_RT$ImproverRT
   
-  grid = 10^seq(10, -2, length = 100)
+  #grid = 10^seq(10, -2, length = 100)
   cv.out_RT = cv.glmnet(x_train_RT, y_train_RT, alpha = 1, family = 'binomial', intercept=FALSE) # Fit lasso model on training data
   plot(cv.out_RT) 
   bestlam_RT = cv.out_RT$lambda.min # Select lamda that minimizes training binomial deviance
