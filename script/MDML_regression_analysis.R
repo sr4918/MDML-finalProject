@@ -350,7 +350,7 @@ x_test = model.matrix(~., test%>%select(-ImproverScore))
 y_test <- test$ImproverScore
 
 grid = 10^seq(10, -2, length = 100)
-cv.out = cv.glmnet(x_train, y_train, alpha = 1, family = 'binomial') # Fit lasso model on training data
+cv.out = cv.glmnet(x_train, y_train, alpha = 1, family = 'binomial', intercept=FALSE) # Fit lasso model on training data
 plot(cv.out) # Draw plot of training MSE as a function of lambda
 bestlam = cv.out$lambda.min # Select lamda that minimizes training binomial deviance
 lasso_pred = predict(cv.out, s = bestlam, newx = x_test, type = 'response') # Use best lambda to predict test data
@@ -358,7 +358,7 @@ pred_lasso <- prediction(lasso_pred, y_test)
 perf.lasso <- performance(pred_lasso,'auc')
 cat(perf.lasso@y.values[[1]])
 
-out = glmnet(LassoNIHScore_x, LassoNIHScore_y, alpha = 1, lambda = grid) # Fit lasso model on full dataset
+out = glmnet(LassoNIHScore_x, LassoNIHScore_y, alpha = 1, lambda = grid,intercept=FALSE) # Fit lasso model on full dataset
 lasso_coef = predict(out, type = "coefficients", s = bestlam) # Display coefficients using lambda chosen by CV
 lasso_coef
 str(lasso_coef)
@@ -371,11 +371,11 @@ str(lasso_coef)
   colnames(lasso_coef_feature_names) <- c("i", "Variable")
   
   #lasso_coef_df <- as.data.frame(lasso_coef@Dimnames[[1]], lasso_coef@x)
-  lasso_coef_df <-  left_join(lasso_coef_df, lasso_coef_feature_names, by = "i") 
+  lasso_coef_df <-  left_join(lasso_coef_df, lasso_coef_feature_names, by = "i") %>%
     arrange(desc(abs(x))) %>%
     rename(Coefficient = x)
 
-      #Make Variable an ordered factor so it will be in order for ggplot
+  #Make Variable an ordered factor so it will be in order for ggplot
       lasso_coef_df$Variable <- factor(lasso_coef_df$Variable, levels = lasso_coef_df$Variable[order( abs(lasso_coef_df$Coefficient))])
 
   ImproverScoreFeatureGraph <- ggplot(data = lasso_coef_df, aes(x = Variable, y = Coefficient, fill = Coefficient)) +
