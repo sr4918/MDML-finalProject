@@ -7,13 +7,10 @@ require(dplyr)
 
 
 #For Lasso regression 
-<<<<<<< HEAD
 #Read in AYCET gameplay data and DCCS data
 AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") %>%mutate(userID = factor(userID))
-=======
 #Read in AYCET gameplay data and DCCS data; change userID to factor for merge
-AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") 
->>>>>>> 13f962b895a5667bb11b25149223ea0b006d7e64
+
 ALL_DCCS_data <- read_csv("data/ALL_DCCS_data.csv") %>%
   mutate(userID = factor(userID))
 missing_users<-c("16902", "16806", "16939" ,"16989" ,"17047", "17050","17577")
@@ -338,14 +335,11 @@ AYCET_DCCS <- AYCET_DCCS %>%
 
 #colnames(AYCET_DCCS)
 
-<<<<<<< HEAD
 NAs_per_col <- colSums(is.na(AYCET_DCCS))
 # need to replace all NA's with 0 (absent users)
 AYCET_DCCS<-AYCET_DCCS%>%select(-dateTime.x, -dateTime.y)
 AYCET_DCCS<-AYCET_DCCS%>% 
   replace_na(set_names(as.list(rep(0, length(.))), names(.)))
-=======
->>>>>>> 13f962b895a5667bb11b25149223ea0b006d7e64
 
 #Define & Add outcomes for DCCS
   #Already calculated - improvement (based on change in DCCS NIH Score), DCCS$ImproverScore
@@ -397,24 +391,6 @@ lasso_coef = predict(out, type = "coefficients", s = bestlam) # Display coeffici
 lasso_coef
 
 
-
-data <- rbind(training_set, testing_set[,1:12])
-
-x <- model.matrix(outcome ~ inspection_date + borough + cuisine + inspection_year + month +
-                    weekday + num_previous_low_inspections + num_previous_med_inspections +
-                    num_previous_high_inspections + num_previous_closings, data)[,-1]
-
-
-x_train <- x[1:nrow(training_set),]
-y_train <- training_set$outcome
-
-x_test <- x[nrow(training_set)+1 :nrow(testing_set),] 
-y_test <- testing_set$outcome
-
-
-# fit lasso and ridge
-#model_lasso <- glmnet(x_train, y_train, alpha=1, lambda=.01, family='binomial')
-model_lasso2 <- glmnet(x_train, y_train, alpha=1, lambda=.01, family='binomial', intercept=FALSE) #without intercept
 
 # 2. Generate predictions from both models on testing_set and calculate the AUC (for both models).
 prob_lasso <- predict(model_lasso2, x_test,type='response')
