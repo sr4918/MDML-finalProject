@@ -420,7 +420,7 @@ str(lasso_coef)
   #cat(perf.lasso_Acc@y.values[[1]])
   
   out_Acc = glmnet(LassoNIHScore_x, LassoNIHScore_y, alpha = 1, lambda = grid,intercept=FALSE) # Fit lasso model on full dataset
-  lasso_coef_Acc = predict(out, type = "coefficients", s = bestlam_Acc) # Display coefficients using lambda chosen by CV
+  lasso_coef_Acc = predict(out_Acc, type = "coefficients", s = bestlam_Acc) # Display coefficients using lambda chosen by CV
   lasso_coef_Acc
   str(lasso_coef_Acc)
   ###Bar graph of coefficients
@@ -447,6 +447,65 @@ str(lasso_coef)
   
   
   ###################
+  
+  #LASSO3: 'Improver' Based on change in Reaction Time; outcome of interest is ImproverRT
+  
+  #split to test train
+  #Remove all outcomes
+  LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
+  LassoNIHScore_y <-AYCET_DCCS$ImproverRT
+  
+  #TRAIN DATA SET
+  train = AYCET_DCCS %>%
+    sample_frac(0.6)
+  
+  #TEST DATA SET
+  test = AYCET_DCCS %>%
+    setdiff(train)
+  
+  #TRAIN x and y    
+  x_train_RT = model.matrix(~., train%>%select(-ImproverRT))
+  y_train_RT = train$ImproverRT
+  
+  #TEST x and y 
+  x_test_RT = model.matrix(~., test%>%select(-ImproverRT))
+  y_test_RT <- test$ImproverRT
+  
+  grid = 10^seq(10, -2, length = 100)
+  cv.out_RT = cv.glmnet(x_train_RT, y_train_RT, alpha = 1, family = 'binomial', intercept=FALSE) # Fit lasso model on training data
+  plot(cv.out_RT) 
+  bestlam_RT = cv.out_RT$lambda.min # Select lamda that minimizes training binomial deviance
+  #commented lines throw error. sure doing something stupid here
+  #lasso_pred_RT = predict(cv.out_RT, s = bestlam_RT, newx = x_test_RT, type = 'response') # Use best lambda to predict test data
+  #pred_lasso_RT <- prediction(lasso_pred_RT, y_test_RT)
+  #perf.lasso_RT <- performance(pred_lasso_RT,'auc')
+  #cat(perf.lasso_RT@y.values[[1]])
+  
+  out_RT = glmnet(LassoNIHScore_x, LassoNIHScore_y, alpha = 1, lambda = grid,intercept=FALSE) # Fit lasso model on full dataset
+  lasso_coef_RT = predict(out_RT, type = "coefficients", s = bestlam_RT) # Display coefficients using lambda chosen by CV
+  lasso_coef_RT
+  str(lasso_coef_RT)
+  ###Bar graph of coefficients
+  #Extract coefficient data & change variable type for merge
+  lasso_coef_RT_df <- as.data.frame(summary(lasso_coef_RT))
+  lasso_coef_RT_df$i <- as.character(lasso_coef_RT_df$i)
+  
+  lasso_coef_RT_feature_names <- as.data.frame(cbind(seq(1:length(lasso_coef_RT@Dimnames[[1]])), lasso_coef_RT@Dimnames[[1]]))
+  colnames(lasso_coef_RT_feature_names) <- c("i", "Variable")
+  
+  #lasso_coef_df <- as.data.frame(lasso_coef@Dimnames[[1]], lasso_coef@x)
+  lasso_coef_RT_df <-  left_join(lasso_coef_RT_df, lasso_coef_RT_feature_names, by = "i") %>%
+    arrange(desc(abs(x))) %>%
+    rename(Coefficient = x)
+  
+  #Make Variable an ordered factor so it will be in order for ggplot
+  lasso_coef_RT_df$Variable <- factor(lasso_coef_RT_df$Variable, levels = lasso_coef_RT_df$Variable[order( abs(lasso_coef_RT_df$Coefficient))])
+  
+  ImproverRTimeFeatureGraph <- ggplot(data = lasso_coef_RT_df, aes(x = Variable, y = Coefficient, fill = Coefficient)) +
+    geom_bar(stat = "identity") +
+    scale_fill_gradient(low = "#0b200e", high = "#37a146") +
+    coord_flip() +
+    labs(title = "Model Coefficients for Outcome as Change in Reaction Time")
   
   
   
