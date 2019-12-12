@@ -334,7 +334,7 @@ LassoNIHScore_y <-AYCET_DCCS$ImproverScore
 #LassoNIHScore_Acc_y <-AYCET_DCCS$ImproverAccuracy
 #LassoNIHScore_RT_y <-AYCET_DCCS$ImproverRT
 #LassoNIHScore_PostScore_y <-AYCET_DCCS$ImprovedPostScoreGT7
-
+set.seed(1234)
 
 #TRAIN DATA SET
 train = AYCET_DCCS %>%
@@ -393,36 +393,36 @@ str(lasso_coef)
   
   #split to test train
   #Remove all outcomes
-  LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
-  LassoNIHScore_y <-AYCET_DCCS$ImproverAccuracy
+  LassoNIHScore_Acc_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
+  LassoNIHScore_Acc_y <-AYCET_DCCS$ImproverAccuracy
   
   #TRAIN DATA SET
-  train = AYCET_DCCS %>%
+  train_Acc = AYCET_DCCS %>%
     sample_frac(0.6)
   
   #TEST DATA SET
-  test = AYCET_DCCS %>%
-    setdiff(train)
+  test_Acc = AYCET_DCCS %>%
+    setdiff(train_Acc)
   
   #TRAIN x and y    
-  x_train_Acc = model.matrix(~., train%>%select(-ImproverAccuracy))
-  y_train_Acc = train$ImproverAccuracy
+  x_train_Acc = model.matrix(~., train_Acc%>%select(-ImproverAccuracy))
+  y_train_Acc = train_Acc$ImproverAccuracy
   
   #TEST x and y 
-  x_test_Acc = model.matrix(~., test%>%select(-ImproverAccuracy))
-  y_test_Acc <- test$ImproverAccuracy
+  x_test_Acc = model.matrix(~., test_Acc%>%select(-ImproverAccuracy))
+  y_test_Acc <- test_Acc$ImproverAccuracy
   
   grid = 10^seq(10, -2, length = 100)
   cv.out_Acc = cv.glmnet(x_train_Acc, y_train_Acc, alpha = 1, family = 'binomial', intercept=FALSE) # Fit lasso model on training data
   plot(cv.out_Acc) 
   bestlam_Acc = cv.out_Acc$lambda.min # Select lamda that minimizes training binomial deviance
   #commented lines throw error. sure doing something stupid here
-  #lasso_pred_Acc = predict(cv.out_Acc, s = bestlam_Acc, newx = x_test_Acc, type = 'response') # Use best lambda to predict test data
-  #pred_lasso_Acc <- prediction(lasso_pred_Acc, y_test_Acc)
-  #perf.lasso_Acc <- performance(pred_lasso_Acc,'auc')
-  #cat(perf.lasso_Acc@y.values[[1]])
+  lasso_pred_Acc = predict(cv.out_Acc, s = bestlam_Acc, newx = x_test_Acc, type = 'response') # Use best lambda to predict test data
+  pred_lasso_Acc <- prediction(lasso_pred_Acc, y_test_Acc)
+  perf.lasso_Acc <- performance(pred_lasso_Acc,'auc')
+  cat(perf.lasso_Acc@y.values[[1]])
   
-  out_Acc = glmnet(LassoNIHScore_x, LassoNIHScore_y, alpha = 1, lambda = grid,intercept=FALSE) # Fit lasso model on full dataset
+  out_Acc = glmnet(LassoNIHScore_Acc_x, LassoNIHScore_Acc_y, alpha = 1, lambda = grid,intercept=FALSE) # Fit lasso model on full dataset
   lasso_coef_Acc = predict(out_Acc, type = "coefficients", s = bestlam_Acc) # Display coefficients using lambda chosen by CV
   lasso_coef_Acc
   str(lasso_coef_Acc)
@@ -455,36 +455,36 @@ str(lasso_coef)
   
   #split to test train
   #Remove all outcomes
-  LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
-  LassoNIHScore_y <-AYCET_DCCS$ImproverRT
+  LassoNIHScore_RT_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
+  LassoNIHScore_RT_y <-AYCET_DCCS$ImproverRT
   
   #TRAIN DATA SET
-  train = AYCET_DCCS %>%
+  train_RT = AYCET_DCCS %>%
     sample_frac(0.6)
   
   #TEST DATA SET
-  test = AYCET_DCCS %>%
-    setdiff(train)
+  test_RT = AYCET_DCCS %>%
+    setdiff(train_RT)
   
   #TRAIN x and y    
-  x_train_RT = model.matrix(~., train%>%select(-ImproverRT))
-  y_train_RT = train$ImproverRT
+  x_train_RT = model.matrix(~., train_RT%>%select(-ImproverRT))
+  y_train_RT = train_RT$ImproverRT
   
   #TEST x and y 
-  x_test_RT = model.matrix(~., test%>%select(-ImproverRT))
-  y_test_RT <- test$ImproverRT
+  x_test_RT = model.matrix(~., test_RT%>%select(-ImproverRT))
+  y_test_RT <- test_RT$ImproverRT
   
   grid = 10^seq(10, -2, length = 100)
   cv.out_RT = cv.glmnet(x_train_RT, y_train_RT, alpha = 1, family = 'binomial', intercept=FALSE) # Fit lasso model on training data
   plot(cv.out_RT) 
   bestlam_RT = cv.out_RT$lambda.min # Select lamda that minimizes training binomial deviance
   #commented lines throw error. sure doing something stupid here
-  #lasso_pred_RT = predict(cv.out_RT, s = bestlam_RT, newx = x_test_RT, type = 'response') # Use best lambda to predict test data
-  #pred_lasso_RT <- prediction(lasso_pred_RT, y_test_RT)
-  #perf.lasso_RT <- performance(pred_lasso_RT,'auc')
-  #cat(perf.lasso_RT@y.values[[1]])
+  lasso_pred_RT = predict(cv.out_RT, s = bestlam_RT, newx = x_test_RT, type = 'response') # Use best lambda to predict test data
+  pred_lasso_RT <- prediction(lasso_pred_RT, y_test_RT)
+  perf.lasso_RT <- performance(pred_lasso_RT,'auc')
+  cat(perf.lasso_RT@y.values[[1]])
   
-  out_RT = glmnet(LassoNIHScore_x, LassoNIHScore_y, alpha = 1, lambda = grid,intercept=FALSE) # Fit lasso model on full dataset
+  out_RT = glmnet(LassoNIHScore_RT_x, LassoNIHScore_RT_y, alpha = 1, lambda = grid,intercept=FALSE) # Fit lasso model on full dataset
   lasso_coef_RT = predict(out_RT, type = "coefficients", s = bestlam_RT) # Display coefficients using lambda chosen by CV
   lasso_coef_RT
   str(lasso_coef_RT)
@@ -515,47 +515,3 @@ str(lasso_coef)
 
 
 #######################################
-#Is everything below just scratch material?
-data <- rbind(training_set, testing_set[,1:12])
-
-x <- model.matrix(outcome ~ inspection_date + borough + cuisine + inspection_year + month +
-                    weekday + num_previous_low_inspections + num_previous_med_inspections +
-                    num_previous_high_inspections + num_previous_closings, data)[,-1]
-
-
-x_train <- x[1:nrow(training_set),]
-y_train <- training_set$outcome
-
-x_test <- x[nrow(training_set)+1 :nrow(testing_set),] 
-y_test <- testing_set$outcome
-
-
-# fit lasso and ridge
-#model_lasso <- glmnet(x_train, y_train, alpha=1, lambda=.01, family='binomial')
-model_lasso2 <- glmnet(x_train, y_train, alpha=1, lambda=.01, family='binomial', intercept=FALSE) #without intercept
-
-# 2. Generate predictions from both models on testing_set and calculate the AUC (for both models).
-prob_lasso <- predict(model_lasso2, x_test,type='response')
-pred_lasso <- prediction(prob_lasso, y_test)
-perf.lasso <- performance(pred_lasso,'auc')
-cat(perf.lasso@y.values[[1]])
-###########################
-  
-#Need to remove variables with many NAs, 
-#or replace NAs with 0 for all of the AYCET data.
-
-NAs_per_col <- data.frame(matrix(ncol = 2, nrow = 0))
-NAs_per_col <- colSums(is.na(AYCET_DCCS))
-#all _see_6 columns have a large number of NA's >140 dropping these; DONE in like 25
-grep("_sess_6",colnames(AYCET_DCCS))
-
-names(NAs_per_col)<-c("totalNA")
-NAs_per_col<-NAs_per_col%>%arrange(-totalNA)
-LassoNIHScore <- model.matrix(ImproverScore ~ ., AYCET_DCCS)[,-1]
-
-#Lasso 1: Which game play features are associated with improvement in DCCS NIH Score?
-ImproverScore
-
-#Lasso 2: Which game play features are associated with high accuracy in the DCCS Accuracy outcome?
-
-#Lasso 3: Which game play features are associated with low reaction times in DCCS (high scores = fast, correct responses)?
