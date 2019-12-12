@@ -11,10 +11,10 @@ require(gridExtra)
 
 #For Lasso regression 
 
-#Read in AYCET gameplay data and DCCS data
+#Read in AYCET gameplay data; change userID to factor for merge
 AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") %>%mutate(userID = factor(userID))
-#Read in AYCET gameplay data and DCCS data; change userID to factor for merge
 
+#Read in DCCS data; change userID to factor for merge
 ALL_DCCS_data <- read_csv("data/ALL_DCCS_data.csv") %>%
   mutate(userID = factor(userID)) %>%
   select(-c("dateTime.x", "dateTime.y","AllImprove", "ImprovedPostScoreGT7"))
@@ -37,8 +37,8 @@ count <- AYCET_DCCS %>%
 #remove variables with many NAs; change variable types; convert ordered factors to numbers to impute missing data
 AYCET_DCCS <- AYCET_DCCS %>%
   #Drop columns that are not data for model or missing too much data
-  select(-matches("_sess_6|_sess_5")) %>%
-  select(-c("accessCode", "userID","pre_nihScore", "post_nihScore", "pre_nihAccuracy", "post_nihAccuracy", "pre_nihRTScore", "post_nihRTScore", "DiffScore", "DiffAccuracy", "DiffRT")) %>%
+  select(-matches("_sess_6|_sess_5|Miss_AvgRT_|Miss_SDRT_")) %>%
+  select(-c("accessCode", "userID", "avgRT_afterWrong_MISSED", "pre_nihScore", "post_nihScore", "pre_nihAccuracy", "post_nihAccuracy", "pre_nihRTScore", "post_nihRTScore", "DiffScore", "DiffAccuracy", "DiffRT")) %>%
   #Recode factor levels
   mutate(highestLevel_user = case_when( highestLevel_user == "SpaceCakesLevel 0-0" ~ 1, 
                                         highestLevel_user == "SpaceCakesLevel 0-1" ~ 2, 
