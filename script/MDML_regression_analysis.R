@@ -332,6 +332,10 @@ AYCET_DCCS<-AYCET_DCCS%>%
 #Remove all outcomes
 LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
 LassoNIHScore_y <-AYCET_DCCS$ImproverScore
+#LassoNIHScore_Acc_y <-AYCET_DCCS$ImproverAccuracy
+#LassoNIHScore_RT_y <-AYCET_DCCS$ImproverRT
+#LassoNIHScore_PostScore_y <-AYCET_DCCS$ImprovedPostScoreGT7
+
 
 #TRAIN DATA SET
 train = AYCET_DCCS %>%
