@@ -329,7 +329,7 @@ AYCET_DCCS <- AYCET_DCCS %>%
 
 #split to test train
 #Remove all outcomes
-LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7, -AllImprove))
+LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT))
 LassoNIHScore_y <-AYCET_DCCS$ImproverScore
 set.seed(1234)
 
@@ -390,7 +390,7 @@ str(lasso_coef)
   
   #split to test train
   #Remove all outcomes
-  Lasso_Acc_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
+  Lasso_Acc_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT))
   Lasso_Acc_y <-AYCET_DCCS$ImproverAccuracy
   
   #TRAIN x and y    
@@ -443,7 +443,7 @@ str(lasso_coef)
   
   #split to test train
   #Remove all outcomes
-  Lasso_RT_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
+  Lasso_RT_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT))
   Lasso_RT_y <-AYCET_DCCS$ImproverRT
   
   #TRAIN x and y    
