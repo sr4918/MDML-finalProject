@@ -15,7 +15,7 @@ AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") %>%m
 
 ALL_DCCS_data <- read_csv("data/ALL_DCCS_data.csv") %>%
   mutate(userID = factor(userID)) %>%
-  select(-c("dateTime.x", "dateTime.y"))
+  select(-c("dateTime.x", "dateTime.y","AllImprove", "ImprovedPostScoreGT7"))
 
 #Merge by userID so each row represents one participant
 AYCET_DCCS <- left_join(AYCET_gameplay_aggregated, ALL_DCCS_data, by = c("userID"))
