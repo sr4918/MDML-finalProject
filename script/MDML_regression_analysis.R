@@ -382,7 +382,7 @@ str(lasso_coef)
 
   ImproverScoreFeatureGraph <- ggplot(data = lasso_coef_df, aes(x = Variable, y = Coefficient, fill = Coefficient)) +
     geom_bar(stat = "identity") +
-    scale_color_gradient2(low = "#1e201e", mid = "#c1c6c2", high = "#37a146", midpoint = .3) +
+    scale_fill_gradient(low = "#0b200e", high = "#37a146") +
     coord_flip() +
     labs(title = "Model Coefficients for Outcome as Change in NIH Score")
 
