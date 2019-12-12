@@ -8,9 +8,10 @@ require(ggplot2)
 
 
 #For Lasso regression 
+
+#Read in AYCET gameplay data and DCCS data
+AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") %>%mutate(userID = factor(userID))
 #Read in AYCET gameplay data and DCCS data; change userID to factor for merge
-AYCET_gameplay_aggregated <- read_csv("data/AYCET_gameplay_aggregated.csv") %>% 
-  mutate(userID = factor(userID))
 
 ALL_DCCS_data <- read_csv("data/ALL_DCCS_data.csv") %>%
   mutate(userID = factor(userID)) %>%
@@ -309,6 +310,22 @@ AYCET_DCCS <- AYCET_DCCS %>%
         replace_na(set_names(as.list(rep(0, length(.))), names(.)))
 
 
+<<<<<<< HEAD
+#colnames(AYCET_DCCS)
+
+NAs_per_col <- colSums(is.na(AYCET_DCCS))
+# need to replace all NA's with 0 (absent users)
+AYCET_DCCS<-AYCET_DCCS%>%select(-dateTime.x, -dateTime.y)
+AYCET_DCCS<-AYCET_DCCS%>% 
+  replace_na(set_names(as.list(rep(0, length(.))), names(.)))
+
+#Define & Add outcomes for DCCS
+  #Already calculated - improvement (based on change in DCCS NIH Score), DCCS$ImproverScore
+  #New: Above the median, Accuracy of 5 vs below five
+  #New: Above the median, RT Score of 2.7 vs below 2.7
+
+#test and train data using 5 fold cross validation
+#precision and accuracy graphs
 
 ###########################
 #LASSO: 'Improver' Based on change in NIH Score; outcome of interest is ImproverScore
