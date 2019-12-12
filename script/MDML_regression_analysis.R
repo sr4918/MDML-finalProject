@@ -356,12 +356,16 @@ str(lasso_coef)
   colnames(lasso_coef_feature_names) <- c("i", "Variable")
   
   #lasso_coef_df <- as.data.frame(lasso_coef@Dimnames[[1]], lasso_coef@x)
-  lasso_coef_df <-  left_join(lasso_coef_df, lasso_coef_feature_names, by = "i") %>%
+  lasso_coef_df <-  left_join(lasso_coef_df, lasso_coef_feature_names, by = "i") 
     arrange(desc(abs(x))) %>%
-    rename(coefficient = x)
+    rename(Coefficient = x)
 
-  ImproverScoreFeatureGraph <- ggplot(data = lasso_coef_df, aes(x = Variable, y = coefficient)) +
-    geom_bar(stat = "identity")
+      #Make Variable an ordered factor so it will be in order for ggplot
+      lasso_coef_df$Variable <- factor(lasso_coef_df$Variable, levels = lasso_coef_df$Variable[order( abs(lasso_coef_df$Coefficient))])
+
+  ImproverScoreFeatureGraph <- ggplot(data = lasso_coef_df, aes(x = Variable, y = Coefficient, fill = Coefficient)) +
+    geom_bar(stat = "identity") +
+    coord_flip()
 
 
 
