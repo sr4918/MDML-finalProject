@@ -313,19 +313,6 @@ AYCET_DCCS <- AYCET_DCCS %>%
 #colnames(AYCET_gameplay_aggregated)
 #colnames(AYCET_DCCS)
 
-#NAs_per_col <- colSums(is.na(AYCET_DCCS))
-# need to replace all NA's with 0 (absent users)
-#AYCET_DCCS<-AYCET_DCCS%>% 
-#  replace_na(set_names(as.list(rep(0, length(.))), names(.)))
-
-#Define & Add outcomes for DCCS
-  #Already calculated - improvement (based on change in DCCS NIH Score), DCCS$ImproverScore
-  #New: Above the median, Accuracy of 5 vs below five
-  #New: Above the median, RT Score of 2.7 vs below 2.7
-
-#test and train data using 5 fold cross validation
-#precision and accuracy graphs
-
 ###########################
 #LASSO: 'Improver' Based on change in NIH Score; outcome of interest is ImproverScore
 
