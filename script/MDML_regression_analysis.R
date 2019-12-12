@@ -331,9 +331,6 @@ AYCET_DCCS <- AYCET_DCCS %>%
 #Remove all outcomes
 LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7, -AllImprove))
 LassoNIHScore_y <-AYCET_DCCS$ImproverScore
-#LassoNIHScore_Acc_y <-AYCET_DCCS$ImproverAccuracy
-#LassoNIHScore_RT_y <-AYCET_DCCS$ImproverRT
-#LassoNIHScore_PostScore_y <-AYCET_DCCS$ImprovedPostScoreGT7
 set.seed(1234)
 
 #TRAIN DATA SET
@@ -393,26 +390,17 @@ str(lasso_coef)
   
   #split to test train
   #Remove all outcomes
-  LassoNIHScore_Acc_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
-  LassoNIHScore_Acc_y <-AYCET_DCCS$ImproverAccuracy
+  Lasso_Acc_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
+  Lasso_Acc_y <-AYCET_DCCS$ImproverAccuracy
   
-  #TRAIN DATA SET
-  train_Acc = AYCET_DCCS %>%
-    sample_frac(0.6)
-  
-  #TEST DATA SET
-  test_Acc = AYCET_DCCS %>%
-    setdiff(train_Acc)
-
-    #TRAIN x and y    
-  x_train_Acc = model.matrix(~., train_Acc%>%select(-ImproverAccuracy))
-  y_train_Acc = train_Acc$ImproverAccuracy
+  #TRAIN x and y    
+  x_train_Acc = model.matrix(~., train%>%select(-ImproverAccuracy))
+  y_train_Acc = train$ImproverAccuracy
   
   #TEST x and y 
-  x_test_Acc = model.matrix(~., test_Acc%>%select(-ImproverAccuracy))
-  y_test_Acc <- test_Acc$ImproverAccuracy
+  x_test_Acc = model.matrix(~., test%>%select(-ImproverAccuracy))
+  y_test_Acc <- test$ImproverAccuracy
   
-  #grid = 10^seq(10, -2, length = 100)
   cv.out_Acc = cv.glmnet(x_train_Acc, y_train_Acc, alpha = 1, family = 'binomial', intercept=FALSE) # Fit lasso model on training data
   plot(cv.out_Acc) 
   bestlam_Acc = cv.out_Acc$lambda.min # Select lamda that minimizes training binomial deviance
@@ -422,7 +410,7 @@ str(lasso_coef)
   perf.lasso_Acc <- performance(pred_lasso_Acc,'auc')
   cat(perf.lasso_Acc@y.values[[1]])
   
-  out_Acc = glmnet(LassoNIHScore_Acc_x, LassoNIHScore_Acc_y, alpha = 1, lambda = grid,intercept=FALSE) # Fit lasso model on full dataset
+  out_Acc = glmnet(Lasso_Acc_x, Lasso_Acc_y, alpha = 1, lambda = grid,intercept=FALSE) # Fit lasso model on full dataset
   lasso_coef_Acc = predict(out_Acc, type = "coefficients", s = bestlam_Acc) # Display coefficients using lambda chosen by CV
   lasso_coef_Acc
   str(lasso_coef_Acc)
@@ -455,26 +443,17 @@ str(lasso_coef)
   
   #split to test train
   #Remove all outcomes
-  LassoNIHScore_RT_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
-  LassoNIHScore_RT_y <-AYCET_DCCS$ImproverRT
+  Lasso_RT_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT, -ImprovedPostScoreGT7))
+  Lasso_RT_y <-AYCET_DCCS$ImproverRT
   
-  #TRAIN DATA SET
-  train_RT = AYCET_DCCS %>%
-    sample_frac(0.6)
-  
-  #TEST DATA SET
-  test_RT = AYCET_DCCS %>%
-    setdiff(train_RT)
-
   #TRAIN x and y    
-  x_train_RT = model.matrix(~., train_RT%>%select(-ImproverRT))
-  y_train_RT = train_RT$ImproverRT
+  x_train_RT = model.matrix(~., train%>%select(-ImproverRT))
+  y_train_RT = train$ImproverRT
   
   #TEST x and y 
-  x_test_RT = model.matrix(~., test_RT%>%select(-ImproverRT))
-  y_test_RT <- test_RT$ImproverRT
+  x_test_RT = model.matrix(~., test%>%select(-ImproverRT))
+  y_test_RT <- test$ImproverRT
   
-  #grid = 10^seq(10, -2, length = 100)
   cv.out_RT = cv.glmnet(x_train_RT, y_train_RT, alpha = 1, family = 'binomial', intercept=FALSE) # Fit lasso model on training data
   plot(cv.out_RT) 
   bestlam_RT = cv.out_RT$lambda.min # Select lamda that minimizes training binomial deviance
@@ -484,7 +463,7 @@ str(lasso_coef)
   perf.lasso_RT <- performance(pred_lasso_RT,'auc')
   cat(perf.lasso_RT@y.values[[1]])
   
-  out_RT = glmnet(LassoNIHScore_RT_x, LassoNIHScore_RT_y, alpha = 1, lambda = grid,intercept=FALSE) # Fit lasso model on full dataset
+  out_RT = glmnet(Lasso_RT_x, Lasso_RT_y, alpha = 1, lambda = grid,intercept=FALSE) # Fit lasso model on full dataset
   lasso_coef_RT = predict(out_RT, type = "coefficients", s = bestlam_RT) # Display coefficients using lambda chosen by CV
   lasso_coef_RT
   str(lasso_coef_RT)
