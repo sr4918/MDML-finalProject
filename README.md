@@ -30,7 +30,7 @@ The file "MDML_reading_gameplay.R" contains the steps used to import, restructur
 
 The file "PrePostTest_Analysis.R" contains the steps used to import, explore, and clean the data from the DCCS task logs, and combine the pretest results with the posttest results into a wide format file. Additional variables representing outcomes were also calculated. 
 
-The DCCS task has a complex scoring system developed by the NIH. To investigate our research questions, we needed to do some preliminary, exploratory analyses of the DCCS scores. Data created in these preliminary analyses have been exported to the 'output' folder.
+The DCCS task is scored according to a system developed by the NIH. To investigate our research questions, we needed to do some preliminary, exploratory analyses of the DCCS scores. Data created in these preliminary analyses have been exported to the 'output' folder.
 
 ## Images: 'image' folder
 
