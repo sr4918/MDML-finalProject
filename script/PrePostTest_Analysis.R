@@ -7,7 +7,7 @@ library(GGally)
 library(ggpubr)
 
 
-#4 Analysis:
+#4 Analysis: Data Exploration and Visualization
 # Co relation matrix between pre_nihScore against post_nihSore, pre_nihAccuracy against post_nihAccuracy,
 #pre_nihRTScore against post nihRTScoo_re
 
@@ -19,23 +19,12 @@ library(ggpubr)
       
       #pre against post scores co relation
       res<-cor(cor_data_DCCS[,1:3],cor_data_DCCS[,4:6])
-      res
+      
       write.csv(res,"output/CorelationValues_DCCS.csv", row.names = T)
 
       #multiple scatter plots visualization
       DCCS_scatterplot<- ggpairs(cor_data_DCCS,title="Correlation Plot: Pre and Post Test Scores", aes(fill = "pink"))
       ggsave("images/DCCS_prepost_scatterplot.png",DCCS_scatterplot,width = 14, height = 6, units ="in" )
-
-#FLANKER
-      data2<-read.csv("output/combine_pre-post_FLANKER.csv")
-      
-      cor_data_FLANKER<-select(data2,pre_nihScore, pre_nihAccuracy,pre_nihRTScore ,post_nihScore, post_nihAccuracy, post_nihRTScore)
-      names(cor_data_FLANKER)<-c("pre_TScore", "pre_Acc", "pre_ReactionT", "post_TScore", "post_Acc", "post_ReactionT")
-      res2<-cor(cor_data_FLANKER[,1:3],cor_data_FLANKER[,4:6])
-      res2
-      write.csv(res2,"output/Corelation_FLANKER.csv", row.names = T)
-      FLANKER_scatterplot<- pairs(cor_data_FLANKER,title="FLANKER Pre and Post Test Scores", aes(fill = "blue"))
-      ggsave("output/FLANKER_prepost_scatterplot.png",FLANKER_scatterplot)
 
 
 ### DCCS PLOTS #477 rows of data
@@ -48,15 +37,18 @@ library(ggpubr)
       #Improvers in TotalScore, Accuracy, RT time respectively
       Improvers1<- select(filter(DCCS, DiffScore >0), userID, DiffScore)
       summary(Improvers1$DiffScore)
+      
       p1<-ggplot(Improvers1, aes(x=DiffScore)) + 
         geom_histogram(aes(y=..density..), colour="black", fill="white")+
         geom_density(alpha=.1, fill="#FF6666") 
+      
       Improvers2<- select(filter(DCCS, DiffAccuracy >0), userID,DiffAccuracy)
       summary(Improvers2$DiffAccuracy)
      q1<- ggplot(Improvers2, aes(x=DiffAccuracy)) + 
         geom_histogram(aes(y=..density..), colour="black", fill="white")+
         geom_density(alpha=.1, fill="#FF6666")       
-      Improvers3<- select(filter(DCCS, DiffRT >0), userID, DiffRT)
+      
+     Improvers3<- select(filter(DCCS, DiffRT >0), userID, DiffRT)
       summary(Improvers3$DiffRT)
      r1<- ggplot(Improvers3, aes(x=DiffRT)) + 
         geom_histogram(aes(y=..density..), colour="black", fill="white")+
@@ -85,7 +77,7 @@ library(ggpubr)
        
       ggsave("images/PrePostPlots.png", t2)
       
-     
+      #Labeling Outcome Variables Improvement     
       DCCS$ImproverScore<-ifelse(DCCS$DiffScore>0, 1, 0)
       DCCS$ImproverAccuracy<-ifelse(DCCS$DiffAccuracy>0, 1, 0)
       DCCS$ImproverRT<-ifelse(DCCS$DiffRT >0, 1, 0)
@@ -95,7 +87,4 @@ library(ggpubr)
       write.csv(DCCS, "data/ALL_DCCS_data.csv", row.names = F)
       
       
-      #FinalLabels<-select(DCCS, userID, ImproverScore, ImproverAccuracy,ImproverRT, AllImprove, postScore)
-      #write.csv(FinalLabels, "data/UserLabels.csv", row.names = F)
-      #sum(FinalLabels$postScore==T)
-      
+    

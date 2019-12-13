@@ -319,37 +319,38 @@ AYCET_DCCS <- AYCET_DCCS %>%
 
 #split to test train
 #Remove all outcomes
-LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT))
-LassoNIHScore_y <-AYCET_DCCS$ImproverScore
-set.seed(1234)
-
-#TRAIN DATA SET
-train = AYCET_DCCS %>%
-  sample_frac(0.6)
-
-#TEST DATA SET
-test = AYCET_DCCS %>%
-  setdiff(train)
-
-#TRAIN x and y    
-x_train = model.matrix(~., train%>%select(-ImproverScore))
-y_train = train$ImproverScore
-
-#TEST x and y 
-x_test = model.matrix(~., test%>%select(-ImproverScore))
-y_test <- test$ImproverScore
-
-grid = 10^seq(10, -2, length = 100)
-cv.out = cv.glmnet(x_train, y_train, alpha = 1, family = 'binomial', intercept=FALSE) # Fit lasso model on training data
-plot(cv.out) # Draw plot of training MSE as a function of lambda
-bestlam = cv.out$lambda.min # Select lamda that minimizes training binomial deviance
-lasso_pred = predict(cv.out, s = bestlam, newx = x_test, type = 'response') # Use best lambda to predict test data
-pred_lasso <- prediction(lasso_pred, y_test) #Conduct predictions
-perf.lasso <- performance(pred_lasso,'auc') #Evaluate performance
-cat(perf.lasso@y.values[[1]]) #Obtain AUC value
-
-out = glmnet(LassoNIHScore_x, LassoNIHScore_y, alpha = 1, lambda = grid,intercept=FALSE) # Fit lasso model on full dataset
-lasso_coef = predict(out, type = "coefficients", s = bestlam) # Display coefficients using lambda chosen by CV
+    LassoNIHScore_x <- model.matrix( ~ ., AYCET_DCCS %>% select(-ImproverScore, -ImproverAccuracy, -ImproverRT))
+    LassoNIHScore_y <-AYCET_DCCS$ImproverScore
+    set.seed(1234)
+    
+    #TRAIN DATA SET
+    train = AYCET_DCCS %>%
+      sample_frac(0.6)
+    
+    #TEST DATA SET
+    test = AYCET_DCCS %>%
+      setdiff(train)
+    
+    #TRAIN x and y    
+    x_train = model.matrix(~., train%>%select(-ImproverScore))
+    y_train = train$ImproverScore
+    
+    #TEST x and y 
+    x_test = model.matrix(~., test%>%select(-ImproverScore))
+    y_test <- test$ImproverScore
+    
+    grid = 10^seq(10, -2, length = 100)
+    cv.out = cv.glmnet(x_train, y_train, alpha = 1, family = 'binomial', intercept=FALSE) # Fit lasso model on training data
+    plot(cv.out) 
+    # Select lamda that minimizes training binomial deviance
+    bestlam = cv.out$lambda.min 
+    lasso_pred = predict(cv.out, s = bestlam, newx = x_test, type = 'response') # Use best lambda to predict test data
+    pred_lasso <- prediction(lasso_pred, y_test) #Conduct predictions
+    perf.lasso <- performance(pred_lasso,'auc') #Evaluate performance
+    cat(perf.lasso@y.values[[1]]) #Obtain AUC value
+    
+    out = glmnet(LassoNIHScore_x, LassoNIHScore_y, alpha = 1, lambda = grid,intercept=FALSE) # Fit lasso model on full dataset
+    lasso_coef = predict(out, type = "coefficients", s = bestlam) # Display coefficients using lambda chosen by CV
 #lasso_coef
 #str(lasso_coef)
 ###Bar graph of coefficients
