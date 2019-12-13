@@ -7,7 +7,7 @@ library(GGally)
 library(ggpubr)
 
 
-#4 Analysis:
+#4 Analysis: Data Exploration and Visualization
 # Co relation matrix between pre_nihScore against post_nihSore, pre_nihAccuracy against post_nihAccuracy,
 #pre_nihRTScore against post nihRTScoo_re
 
@@ -77,7 +77,7 @@ library(ggpubr)
        
       ggsave("images/PrePostPlots.png", t2)
       
-     
+      #Labeling Outcome Variables Improvement     
       DCCS$ImproverScore<-ifelse(DCCS$DiffScore>0, 1, 0)
       DCCS$ImproverAccuracy<-ifelse(DCCS$DiffAccuracy>0, 1, 0)
       DCCS$ImproverRT<-ifelse(DCCS$DiffRT >0, 1, 0)
