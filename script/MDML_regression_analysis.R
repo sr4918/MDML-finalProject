@@ -490,3 +490,30 @@ AYCET_DCCS <- AYCET_DCCS %>%
   coefficient_graph <- grid.arrange(ImproverScoreFeatureGraph, ImproverAccuracyFeatureGraph, ImproverRTimeFeatureGraph, ncol = 3,
                top = textGrob("Model Coefficients for Three Outcomes", gp=gpar(fontsize=20)))
 ggsave("images/coefficient_graph.png", coefficient_graph, width = 15, height = 5, units = "in")
+
+
+#######################################
+
+#Apply lasso variables to normal regression
+#Outcome based on improvement
+lasso_coef_df
+
+NIHimprovement_lm <- lm(data = test, ImproverScore ~ FARate_sess_1 + Hit_AvgRT_sess_1 + avgRT_afterWrong_WRONG +
+                          Accuracy_Pct_diff_Medium + count_afterWrong_NA + Wrong_AvgRT_sess_1 + percentCorrect_user +
+                          DPrime_diff_Difficult + highestTrialCount_sess_3 + highestTrialCount_sess_2)
+summary(NIHimprovement_lm)
+#Outcome based on post test accuract criteria
+lasso_coef_Acc_df
+
+Acc_lm <- lm(data = test, ImproverAccuracy ~ accuracy_afterWrong + percentCorrect_user + HitRate_user)
+summary(Acc_lm)
+
+
+#Outcome based on post test RT criteria
+lasso_coef_RT_df
+
+RT_lm <- lm(data = test, ImproverRT ~ Hit_AvgRT_sess_3 + Wrong_SDRT_user + Accuracy_Pct_diff_Medium + 
+              DPrime_sess_2 + Wrong_SDRT_sess_4 + Hit_AvgRT_sess_1 + highestLevel_diff_Easy + percentCorrect_user +
+              fastestRT_sess_4 + nLevels_user)
+summary(RT_lm)
+
