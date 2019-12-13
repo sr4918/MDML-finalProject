@@ -13,8 +13,8 @@ require(compareDF)
 #install.packages("sqldf")
 require(sqldf)
 
-#setwd("corinnebrenner")
-getwd()
+#setwd("MDML-finalProject")
+#getwd()
 ####
 
 #length(unique(ayce_40034_3005Edit$userID))
