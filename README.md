@@ -28,7 +28,7 @@ The 'script' folder contains code for the data assembly, preprocessing, and many
 
 The file "MDML_reading_gameplay.R" contains the steps used to import, restructure, and clean the data from the AYCET game logs. Once the raw data was imported and restructured, the AYCET gameplay data was manipulated to create a variety of features for modeling. Since this process required many steps, we exported intermediary steps with aggregated data in the 'output' folder. 
 
-SAMEEN TO EDIT: The file "PrePostTest_Analysis.R" contains the steps used to import, explore, and clean the data from the DCCS task logs, and combine the pretest results with the posttest results into a wide format file. Additional variables representing outcomes were also calculated. 
+The file "PrePostTest_Analysis.R" contains the steps used to import, explore, and clean the data from the DCCS task logs, and combine the pretest results with the posttest results into a wide format file. Additional variables representing outcomes were also calculated. 
 
 The DCCS task has a complex scoring system developed by the NIH. To investigate our research questions, we needed to do some preliminary, exploratory analyses of the DCCS scores. Data created in these preliminary analyses have been exported to the 'output' folder.
 
